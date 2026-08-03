@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" fill="none">
+  <defs>
+    <linearGradient id="win" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b1d27"/><stop offset="1" stop-color="#14151d"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6557e6"/><stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="20" y="24" width="1160" height="712" rx="20" fill="url(#win)" stroke="#2a2d3d" stroke-width="2"/>
+  <circle cx="50" cy="46" r="6" fill="#ff5f57"/><circle cx="72" cy="46" r="6" fill="#febc2e"/><circle cx="94" cy="46" r="6" fill="#28c840"/>
+  <text x="118" y="51" font-family="ui-sans-serif,system-ui" font-size="13" fill="#9aa0b4">Multiterminal — Project A</text>
+
+  <rect x="20" y="70" width="236" height="666" fill="#191b24"/>
+  <text x="38" y="100" font-family="ui-sans-serif,system-ui" font-size="11" font-weight="600" fill="#7b8198" letter-spacing="1">PROJECTS</text>
+  <rect x="32" y="112" width="212" height="40" rx="8" fill="url(#accent)"/>
+  <text x="46" y="137" font-family="ui-sans-serif,system-ui" font-size="13" font-weight="600" fill="#fff">project-a</text>
+  <text x="226" y="137" font-family="ui-sans-serif,system-ui" font-size="11" fill="#e9e7ff" text-anchor="end">4</text>
+  <text x="46" y="172" font-family="ui-sans-serif,system-ui" font-size="13" fill="#c6cade">project-b</text>
+  <text x="226" y="172" font-family="ui-sans-serif,system-ui" font-size="11" fill="#7b8198" text-anchor="end">6</text>
+  <text x="46" y="207" font-family="ui-sans-serif,system-ui" font-size="13" fill="#c6cade">experiments</text>
+  <text x="226" y="207" font-family="ui-sans-serif,system-ui" font-size="11" fill="#7b8198" text-anchor="end">2</text>
+
+  <rect x="256" y="70" width="924" height="40" fill="#1c1e28"/>
+  <rect x="268" y="84" width="12" height="12" rx="3" fill="url(#accent)"/>
+  <text x="288" y="95" font-family="ui-sans-serif,system-ui" font-size="13" font-weight="600" fill="#e8eaf2">Project A  ·  4 terminals</text>
+  <rect x="1080" y="78" width="88" height="24" rx="6" fill="#262a3a"/>
+  <text x="1124" y="94" font-family="ui-sans-serif,system-ui" font-size="12" fill="#cdd2e6" text-anchor="middle">+ New Terminal</text>
+
+  <!-- pane 1 -->
+  <rect x="264" y="120" width="450" height="300" rx="12" fill="#0e0f15" stroke="#242838" stroke-width="2"/>
+  <rect x="264" y="120" width="450" height="26" rx="12" fill="#222536"/><rect x="264" y="134" width="450" height="12" fill="#222536"/>
+  <text x="278" y="137" font-family="ui-sans-serif,system-ui" font-size="11" fill="#aab0c6">zsh · dev-server</text>
+  <text x="698" y="137" font-family="ui-sans-serif,system-ui" font-size="11" fill="#7b8198" text-anchor="end">✕</text>
+  <text x="278" y="176" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#8b5cf6">➜  dev-server </text>
+  <text x="278" y="198" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#39d98a">npm run dev</text>
+  <text x="278" y="222" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#c9cddd">Local: http://localhost:5173/</text>
+  <text x="278" y="246" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#39d98a">ready in 412ms</text>
+  <text x="278" y="270" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#8b5cf6">➜  </text><rect x="291" y="256" width="7" height="14" fill="#e6f0ff"/>
+
+  <!-- pane 2 -->
+  <rect x="726" y="120" width="446" height="300" rx="12" fill="#0e0f15" stroke="#242838" stroke-width="2"/>
+  <rect x="726" y="120" width="446" height="26" rx="12" fill="#222536"/><rect x="726" y="134" width="446" height="12" fill="#222536"/>
+  <text x="740" y="137" font-family="ui-sans-serif,system-ui" font-size="11" fill="#aab0c6">zsh · api</text>
+  <text x="1156" y="137" font-family="ui-sans-serif,system-ui" font-size="11" fill="#7b8198" text-anchor="end">✕</text>
+  <text x="740" y="176" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#8b5cf6">➜  api </text>
+  <text x="740" y="198" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#39d98a">git pull --rebase</text>
+  <text x="740" y="222" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#c9cddd">Already up to date.</text>
+  <text x="740" y="246" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#8b5cf6">➜  </text><rect x="753" y="232" width="7" height="14" fill="#e6f0ff"/>
+
+  <!-- pane 3 -->
+  <rect x="264" y="432" width="450" height="254" rx="12" fill="#0e0f15" stroke="#242838" stroke-width="2"/>
+  <rect x="264" y="432" width="450" height="26" rx="12" fill="#222536"/><rect x="264" y="446" width="450" height="12" fill="#222536"/>
+  <text x="278" y="449" font-family="ui-sans-serif,system-ui" font-size="11" fill="#aab0c6">zsh · web</text>
+  <text x="278" y="488" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#8b5cf6">➜  web </text>
+  <text x="278" y="510" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#39d98a">git status</text>
+  <text x="278" y="534" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#c9cddd">On branch main — nothing to commit</text>
+  <text x="278" y="558" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#8b5cf6">➜  </text><rect x="291" y="544" width="7" height="14" fill="#e6f0ff"/>
+
+  <!-- pane 4 -->
+  <rect x="726" y="432" width="446" height="254" rx="12" fill="#0e0f15" stroke="#242838" stroke-width="2"/>
+  <rect x="726" y="432" width="446" height="26" rx="12" fill="#222536"/><rect x="726" y="446" width="446" height="12" fill="#222536"/>
+  <text x="740" y="449" font-family="ui-sans-serif,system-ui" font-size="11" fill="#aab0c6">zsh · worker</text>
+  <text x="740" y="488" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#8b5cf6">➜  worker </text>
+  <text x="740" y="510" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#39d98a">pnpm test --watch</text>
+  <text x="740" y="534" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#39d98a">✓ 42 passed</text>
+  <text x="740" y="558" font-family="ui-monospace,Menlo,monospace" font-size="12" fill="#8b5cf6">➜  </text><rect x="753" y="544" width="7" height="14" fill="#e6f0ff"/>
+</svg>

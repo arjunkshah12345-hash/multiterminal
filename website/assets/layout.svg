@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" fill="none">
+  <defs>
+    <linearGradient id="cell" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2b2440"/><stop offset="1" stop-color="#17141f"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6557e6"/><stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <text x="600" y="40" font-family="ui-sans-serif,system-ui" font-size="28" font-weight="700" fill="#eceefb" text-anchor="middle">Panes arrange themselves</text>
+  <text x="600" y="70" font-family="ui-sans-serif,system-ui" font-size="15" fill="#9aa0b4" text-anchor="middle">1 · 2 · 3 · 4 · 6 · 9… a balanced, landscape grid — left-to-right, top-to-bottom</text>
+
+  <!-- 1 -->
+  <g transform="translate(70,120)">
+    <rect width="130" height="150" rx="12" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+  </g>
+  <text x="135" y="300" font-family="ui-monospace,monospace" font-size="16" fill="#c9cddd" text-anchor="middle">1 pane</text>
+
+  <!-- 2 -->
+  <g transform="translate(250,120)">
+    <rect width="62" height="150" rx="12" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="68" width="62" height="150" rx="12" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+  </g>
+  <text x="315" y="300" font-family="ui-monospace,monospace" font-size="16" fill="#c9cddd" text-anchor="middle">2 panes</text>
+
+  <!-- 3 -->
+  <g transform="translate(430,120)">
+    <rect width="42" height="150" rx="12" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="48" width="42" height="150" rx="12" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="96" width="42" height="150" rx="12" fill="url(#acc)" stroke="#8b5cf6" stroke-width="2"/>
+  </g>
+  <text x="510" y="300" font-family="ui-monospace,monospace" font-size="16" fill="#c9cddd" text-anchor="middle">3 panes</text>
+
+  <!-- 4: 2x2 -->
+  <g transform="translate(610,120)">
+    <rect width="72" height="72" rx="12" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="78" width="72" height="72" rx="12" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect y="78" width="72" height="72" rx="12" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="78" y="78" width="72" height="72" rx="12" fill="url(#acc)" stroke="#8b5cf6" stroke-width="2"/>
+  </g>
+  <text x="685" y="300" font-family="ui-monospace,monospace" font-size="16" fill="#c9cddd" text-anchor="middle">4 panes</text>
+
+  <!-- 6: 2x3 -->
+  <g transform="translate(790,110)">
+    <rect width="48" height="90" rx="10" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="54" width="48" height="90" rx="10" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="108" width="48" height="90" rx="10" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect y="96" width="48" height="90" rx="10" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="54" y="96" width="48" height="90" rx="10" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="108" y="96" width="48" height="90" rx="10" fill="url(#acc)" stroke="#8b5cf6" stroke-width="2"/>
+  </g>
+  <text x="866" y="300" font-family="ui-monospace,monospace" font-size="16" fill="#c9cddd" text-anchor="middle">6 panes</text>
+
+  <!-- 9: 3x3 -->
+  <g transform="translate(1000,90)">
+    <rect width="42" height="60" rx="9" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="48" width="42" height="60" rx="9" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="96" width="42" height="60" rx="9" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect y="66" width="42" height="60" rx="9" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="48" y="66" width="42" height="60" rx="9" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="96" y="66" width="42" height="60" rx="9" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect y="132" width="42" height="60" rx="9" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="48" y="132" width="42" height="60" rx="9" fill="url(#cell)" stroke="#3a3358" stroke-width="2"/>
+    <rect x="96" y="132" width="42" height="60" rx="9" fill="url(#acc)" stroke="#8b5cf6" stroke-width="2"/>
+  </g>
+  <text x="1068" y="300" font-family="ui-monospace,monospace" font-size="16" fill="#c9cddd" text-anchor="middle">9 panes</text>
+</svg>

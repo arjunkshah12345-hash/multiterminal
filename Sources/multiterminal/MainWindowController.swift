@@ -9,6 +9,7 @@ final class ContentViewController: NSViewController {
     let grid = TerminalGridContainer()
 
     private let toolbar = NSView()
+    private let brandMark = NSImageView()
     private let projectLabel = NSTextField(labelWithString: "")
     private let newTerminalButton = NSButton()
 
@@ -30,6 +31,12 @@ final class ContentViewController: NSViewController {
         toolbar.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
         view.addSubview(toolbar)
 
+        brandMark.translatesAutoresizingMaskIntoConstraints = false
+        brandMark.image = NSImage(systemSymbolName: "square.grid.2x2.fill", accessibilityDescription: "Multiterminal")
+        brandMark.contentTintColor = Brand.accent
+        brandMark.imageScaling = .scaleProportionallyDown
+        toolbar.addSubview(brandMark)
+
         projectLabel.translatesAutoresizingMaskIntoConstraints = false
         projectLabel.font = .systemFont(ofSize: 13, weight: .semibold)
         projectLabel.textColor = .labelColor
@@ -37,7 +44,7 @@ final class ContentViewController: NSViewController {
 
         newTerminalButton.translatesAutoresizingMaskIntoConstraints = false
         newTerminalButton.isBordered = false
-        newTerminalButton.contentTintColor = .controlAccentColor
+        newTerminalButton.contentTintColor = Brand.accent
         newTerminalButton.title = "New Terminal"
         newTerminalButton.image = NSImage(systemSymbolName: "plus.square", accessibilityDescription: nil)
         newTerminalButton.imagePosition = .imageLeading
@@ -55,7 +62,12 @@ final class ContentViewController: NSViewController {
             toolbar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             toolbar.heightAnchor.constraint(equalToConstant: 30),
 
-            projectLabel.leadingAnchor.constraint(equalTo: toolbar.leadingAnchor, constant: 12),
+            brandMark.leadingAnchor.constraint(equalTo: toolbar.leadingAnchor, constant: 12),
+            brandMark.centerYAnchor.constraint(equalTo: toolbar.centerYAnchor),
+            brandMark.widthAnchor.constraint(equalToConstant: 16),
+            brandMark.heightAnchor.constraint(equalToConstant: 16),
+
+            projectLabel.leadingAnchor.constraint(equalTo: brandMark.trailingAnchor, constant: 8),
             projectLabel.centerYAnchor.constraint(equalTo: toolbar.centerYAnchor),
 
             newTerminalButton.trailingAnchor.constraint(equalTo: toolbar.trailingAnchor, constant: -8),
@@ -180,6 +192,9 @@ final class MainSplitViewController: NSSplitViewController {
         let count = project?.sessions.count ?? 0
         contentVC.setProjectTitle(project?.name ?? "No Project", terminalCount: count)
 
+        // Dynamic window title: "Multiterminal — <project>"
+        view.window?.title = project.map { "Multiterminal — \($0.name)" } ?? "Multiterminal"
+
         let emptyMsg = store.projects.isEmpty
             ? "No projects — press ⌘N to create one"
             : "No terminals — press ⌘T to create one"
@@ -187,9 +202,57 @@ final class MainSplitViewController: NSSplitViewController {
 
         // Give the grid a layout pass, then focus the first terminal.
         contentVC.grid.needsLayout = true
+        wirePaneContextActions()
         DispatchQueue.main.async { [weak self] in
             self?.contentVC.grid.focusFirstTerminal()
         }
+    }
+
+    /// Wire each visible pane's header menu to organize/move actions (idempotent).
+    private func wirePaneContextActions() {
+        guard let project = store.selectedProject else { return }
+        for session in project.sessions {
+            let pane = session.pane
+            if pane.onContextAction == nil {
+                pane.onContextAction = { [weak self] action in
+                    self?.handlePaneContext(action, session: session)
+                }
+            }
+            if pane.projectProvider == nil {
+                pane.projectProvider = { [weak self] in
+                    self?.store.projects.map { ($0.name, $0) } ?? []
+                }
+            }
+        }
+    }
+
+    private func handlePaneContext(_ action: PaneContextAction, session: TerminalSession) {
+        switch action {
+        case .moveLeft: store.moveTerminal(session, by: -1)
+        case .moveRight: store.moveTerminal(session, by: 1)
+        case .moveToProject(let target): store.moveTerminal(session, to: target)
+        }
+    }
+
+    /// Apply the current Appearance setting to the window (called at launch + on change).
+    func applyAppearance() {
+        view.window?.appearance = Settings.shared.appearance.nsAppearance
+    }
+
+    /// Present the Settings sheet (⌘,).
+    func presentSettings() {
+        let vc = SettingsViewController()
+        vc.onChange = { [weak self] in self?.applySettingsLive() }
+        let sheet = NSWindow(contentViewController: vc)
+        sheet.styleMask = [.titled]
+        sheet.title = "Settings"
+        view.window?.beginSheet(sheet)
+    }
+
+    /// Apply appearance + font size to all terminals (live).
+    func applySettingsLive() {
+        applyAppearance()
+        store.applyFontToAll()
     }
 
     // MARK: Helpers

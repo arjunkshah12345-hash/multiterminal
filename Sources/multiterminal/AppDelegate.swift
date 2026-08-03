@@ -17,6 +17,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         NSApp.mainMenu = buildMainMenu()
         NSApp.activate(ignoringOtherApps: true)
+
+        // Apply persisted settings (appearance + font) and react to live changes.
+        Settings.shared.onChange = { [weak self] in self?.applySettings() }
+        applySettings()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
@@ -26,14 +30,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: Menu actions
 
     @objc private func newProject(_ sender: Any?) { store.addProject() }
+    @objc private func openFolderAsProject(_ sender: Any?) {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.canCreateDirectories = false
+        panel.prompt = "Open"
+        panel.title = "Open Folder as Project"
+        guard let window = windowController?.window else { return }
+        panel.beginSheetModal(for: window) { [weak self] response in
+            guard let self = self, response == .OK, let url = panel.url else { return }
+            self.store.addProject(fromFolder: url)
+        }
+    }
     @objc private func newTerminal(_ sender: Any?) { store.addTerminal() }
     @objc private func closeTerminal(_ sender: Any?) { splitVC.closeFocusedTerminal() }
+    @objc private func presentSettings(_ sender: Any?) { splitVC.presentSettings() }
     @objc private func about(_ sender: Any?) {
         NSApp.orderFrontStandardAboutPanel(options: [
             .applicationName: "Multiterminal",
             .applicationVersion: "1.0",
             .version: "1.0"
         ])
+    }
+
+    /// Apply appearance to the window and the current font to all terminals.
+    private func applySettings() {
+        splitVC.applyAppearance()
+        store.applyFontToAll()
     }
 
     // MARK: Main menu
@@ -45,6 +70,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let appMenuItem = NSMenuItem()
         appMenuItem.submenu = menu(titled: "Multiterminal", items: [
             .standard("About Multiterminal", #selector(about), ""),
+            .separator,
+            .target("Settings…", #selector(presentSettings), ","),
             .separator,
             .systemAction("Hide Multiterminal", #selector(NSApplication.hide(_:)), "h"),
             .systemAction("Hide Others", #selector(NSApplication.hideOtherApplications(_:)), "h", [.command, .option]),
@@ -58,6 +85,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let fileMenuItem = NSMenuItem()
         fileMenuItem.submenu = menu(titled: "File", items: [
             .target("New Project", #selector(newProject), "n"),
+            .target("Open Folder as Project…", #selector(openFolderAsProject), "o"),
             .target("New Terminal", #selector(newTerminal), "t"),
             .separator,
             .target("Close Terminal", #selector(closeTerminal), "w")

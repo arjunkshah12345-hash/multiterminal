@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Multiterminal — Your command line, in one beautiful pane</title>
+<meta name="description" content="Multiterminal is a fast, native macOS app that turns every terminal you need into a clean, auto-arranging grid — with a project sidebar, real shells, your history, resizable panes, and more." />
+<meta property="og:title" content="Multiterminal — Your command line, in one beautiful pane" />
+<meta property="og:description" content="A tiny, fast, native macOS multi-pane terminal with a project sidebar." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="/assets/app-icon.png" />
+<link rel="icon" type="image/png" href="/assets/app-icon.png" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<nav class="nav" id="top">
+  <div class="nav-inner">
+    <a class="brand" href="#top">
+      <img src="assets/app-icon.png" alt="Multiterminal" class="brand-logo" />
+      <span class="brand-name">Multiterminal</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#arrange">Panes</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+      <a class="btn btn-primary nav-cta" href="#install">Download for macOS</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-glow"></div>
+  <div class="container hero-inner">
+    <div class="hero-badge"><span class="dot"></span> Free · open-source · macOS</div>
+    <h1>Your command line,<br />in <span class="grad">one beautiful pane.</span></h1>
+    <p class="hero-sub">
+      Multiterminal is a tiny, fast, native macOS app that arranges all of your terminals
+      into a clean grid. Real shells, your full history, projects in the sidebar — and zero clutter.
+    </p>
+    <div class="hero-cta">
+      <a class="btn btn-primary btn-lg" href="#install">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+        Download for macOS
+      </a>
+      <a class="btn btn-ghost btn-lg" href="https://github.com/arjunkshah12345-hash/multiterminal" target="_blank" rel="noopener">Star on GitHub</a>
+    </div>
+    <div class="hero-proof">
+      <span>Native &amp; local-first</span> · <span>No Electron, no webviews</span>
+    </div>
+  </div>
+</header>
+
+<section class="appshot">
+  <div class="container">
+    <img class="mockup" src="assets/app-mockup.svg" alt="Multiterminal app showing a project sidebar and a 2x2 grid of terminals" />
+  </div>
+</section>
+
+<section class="section" id="features">
+  <div class="container">
+    <h2 class="section-title">Everything, where it belongs.</h2>
+    <p class="section-sub">One window for every shell you need.</p>
+    <div class="grid">
+      <div class="card">
+        <div class="card-ico" data-ico="grid">▦</div>
+        <h3>Auto-arranging panes</h3>
+        <p>Open one terminal, two, four, nine — they balance themselves into a tidy grid. No manual tiling, no tab shuffle.</p>
+      </div>
+      <div class="card">
+        <div class="card-ico" data-ico="folder">▸</div>
+        <h3>Projects as folders</h3>
+        <p>Open a folder and it becomes a project. Every pane roots at that folder, and choosing a working directory names it for you.</p>
+      </div>
+      <div class="card">
+        <div class="card-ico" data-ico="term">&gt;_</div>
+        <h3>Real shells, full history</h3>
+        <p>Each pane is a real PTY running your login shell. Your history, aliases, and tools all just work. Restart and it reopens your projects.</p>
+      </div>
+      <div class="card">
+        <div class="card-ico" data-ico="resize">⇿</div>
+        <h3>Resize &amp; organize</h3>
+        <p>Drag dividers to resize any pane. Drag panes around, or move a terminal to another project — right from its header.</p>
+      </div>
+      <div class="card">
+        <div class="card-ico" data-ico="persist">↺</div>
+        <h3>Pick up where you left off</h3>
+        <p>Close and relaunch and Multiterminal restores your projects, folders, and pane layouts from your last session.</p>
+      </div>
+      <div class="card">
+        <div class="card-ico" data-ico="style">◑</div>
+        <h3>Style it your way</h3>
+        <p>System, light, or dark chrome, plus a terminal font size that fits you — all in one settings sheet. ⌘,</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="arrange">
+  <div class="container narrow">
+    <h2 class="section-title">Panes that stay out of your way</h2>
+    <img class="diagram" src="assets/layout.svg" alt="Layout diagram: 1, 2, 3, 4, 6 and 9 panes auto-arranged in grids" />
+    <p class="section-sub">The more you open, the more it contains — left to right, top to bottom. Drag any divider to give a pane more room.</p>
+  </div>
+</section>
+
+<section class="section" id="install">
+  <div class="container narrow">
+    <h2 class="section-title">Install in under a minute</h2>
+    <p class="section-sub">Requires macOS 12+ and the Swift toolchain.</p>
+    <div class="codeblock">
+<pre><code><span class="c"># Build &amp; run (first run fetches SwiftTerm, then it's instant)</span>
+git clone https://github.com/arjunkshah12345-hash/multiterminal.git
+cd multiterminal
+swift run
+
+<span class="c"># Or build a double-clickable .app with the icon</span>
+sh tools/build_app.sh release
+open Multiterminal.app</code></pre>
+    </div>
+    <div class="install-keys">
+      <span><b>⌘T</b> new terminal</span>
+      <span><b>⌘N</b> new project</span>
+      <span><b>⌘O</b> open folder as project</span>
+      <span><b>⌘,</b> settings</span>
+      <span><b>⌘W</b> close terminal</span>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="faq">
+  <div class="container narrow">
+    <h2 class="section-title">FAQ</h2>
+    <details class="faq"><summary>Is it a real terminal, or just a fake UI?</summary>
+      Real. Every pane is a genuine PTY running your login shell — zsh, bash, fish, whatever you use. Commands, history, and tools all behave exactly as expected.</details>
+    <details class="faq"><summary>Does it reopen my work after I quit?</summary>
+      Yes. On relaunch, Multiterminal restores your projects, their folders, and how many panes each had. Shell history lives in your normal history file, so it's there too.</details>
+    <details class="faq"><summary>Can I resize or reorganize panes?</summary>
+      Yes — drag any divider to resize, or right-click a pane header to move it left/right or into another project.</details>
+    <details class="faq"><summary>Is my data local?</summary>
+      Fully local. No account, no cloud, no telemetry. Your projects are stored in your user defaults and folders stay exactly where you put them.</details>
+    <details class="faq"><summary>How is it so fast and small?</summary>
+      Native Swift + AppKit using the SwiftTerm terminal engine. No Electron, no browser, no webview — a single lightweight native binary.</details>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="container">
+    <h2>Give your terminals a real home.</h2>
+    <p>Free, native, open source — built for people who live in the command line.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary btn-lg" href="#install">Download for macOS</a>
+      <a class="btn btn-ghost btn-lg" href="https://github.com/arjunkshah12345-hash/multiterminal" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <span class="brand"><img src="assets/app-icon.png" class="brand-logo" alt="" /> Multiterminal</span>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/arjunkshah12345-hash/multiterminal" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <span class="footer-note">© 2026 ideatr · Made native, kept simple.</span>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

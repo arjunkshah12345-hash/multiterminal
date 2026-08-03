@@ -1,3 +1,6 @@
 .build/
 .swiftpm/
 *.xcodeproj/
+*.app/
+.vercel/
+.DS_Store
