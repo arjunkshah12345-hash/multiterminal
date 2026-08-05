@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body id="top">
+    <a href="#main" class="skip-link">Skip to main content</a>
     <div class="grain" aria-hidden="true"></div>
 
     <header class="nav">
@@ -40,7 +41,7 @@
       </nav>
     </header>
 
-    <main>
+    <main id="main">
       <!-- HERO -->
       <section class="hero" id="try">
         <p class="kicker">multiterminal · the native macOS terminal workspace</p>
@@ -58,7 +59,7 @@
               value="multiterminal"
             />
           </label>
-          <button class="mini-btn" id="hero-scan" type="button">scan</button>
+          <button class="mini-btn" id="hero-scan" type="button" aria-label="Scan wordmark animation">scan</button>
           <a class="btn btn-solid" href="#install">install</a>
         </div>
         <p class="hero-hint">hover to glow · scan to sweep · share with ?w=yourword</p>
@@ -148,7 +149,7 @@
             </ol>
             <p class="install-tip">Power-user one-liner — copy the app and clear quarantine from the terminal:</p>
             <div class="copy-wrap">
-              <button class="copy-btn" type="button">copy</button>
+              <button class="copy-btn" type="button" aria-label="Copy installation commands">copy</button>
               <pre class="codeblock"><span class="dim"># mount the dmg, install, clear Gatekeeper quarantine</span>
 $ cp -R /Volumes/Multiterminal/Multiterminal.app /Applications &amp;&amp; \
   hdiutil detach /Volumes/Multiterminal &amp;&amp; \
@@ -157,7 +158,7 @@ $ cp -R /Volumes/Multiterminal/Multiterminal.app /Applications &amp;&amp; \
           </div>
 
           <div class="copy-wrap">
-            <button class="copy-btn" type="button">copy</button>
+            <button class="copy-btn" type="button" aria-label="Copy clone and run commands">copy</button>
             <pre class="codeblock"><span class="dim"># clone and run</span>
 $ git clone https://github.com/arjunkshah12345-hash/multiterminal.git
 $ cd multiterminal
@@ -171,7 +172,7 @@ $ swift run</pre>
           </p>
 
           <div class="copy-wrap">
-            <button class="copy-btn" type="button">copy</button>
+            <button class="copy-btn" type="button" aria-label="Copy MCP configuration">copy</button>
             <pre class="codeblock"><span class="dim"># connect an MCP client</span>
 {
   <span class="src">"mcpServers"</span>: {

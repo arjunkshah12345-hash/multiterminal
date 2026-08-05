@@ -3,16 +3,21 @@
  * (MIT). Multiterminal owns the content, product surface, and copy below.
  */
 :root {
-  --bg: #121813;
-  --bg-deep: #0b0f0b;
+  --bg: var(--bg);
+  --bg-deep: var(--bg-deep);
+  --surface: var(--surface);
+  --surface-raised: var(--surface-raised);
+  --ink: var(--ink);
   --pad: clamp(14px, 2.3vw, 30px);
   --radius: clamp(18px, 2.2vw, 32px);
   --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Monaco, "Cascadia Mono", "Roboto Mono", monospace;
   --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --glyph-rest: #e2ebdb66;
-  --glyph-hot: #eef4e4;
-  --accent: #78cdbe;
-  --accent-red: #e28c80;
+  --glyph-rest: var(--glyph-rest)66;
+  --glyph-hot: var(--glyph-hot);
+  --accent: var(--accent);
+  --accent-red: var(--accent-red);
+  --accent-orange: var(--accent-orange);
+  --accent-mint: var(--accent-mint);
 }
 
 html {
@@ -53,6 +58,23 @@ a {
   overflow: hidden;
 }
 
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--accent);
+  color: var(--bg);
+  padding: 8px 16px;
+  z-index: 10000;
+  text-decoration: none;
+  font-weight: 600;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
 .grain {
   position: fixed;
   inset: 0;
@@ -77,7 +99,7 @@ a {
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid #eef4e40f;
+  border-bottom: 1px solid var(--glyph-hot)0f;
 }
 
 .brand {
@@ -102,7 +124,7 @@ a {
 .navlinks a {
   font-family: var(--mono);
   font-size: 12px;
-  color: #e2ebdb80;
+  color: var(--glyph-rest)80;
   text-decoration: none;
   letter-spacing: 0.02em;
   transition: color 0.16s;
@@ -130,7 +152,7 @@ a {
   font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #e2ebdb66;
+  color: var(--glyph-rest)66;
   margin: 0;
 }
 
@@ -174,11 +196,11 @@ a {
   display: flex;
   align-items: baseline;
   gap: 12px;
-  background: #0d120e;
-  border: 1px solid #eef4e414;
+  background: var(--surface);
+  border: 1px solid var(--glyph-hot)14;
   border-radius: 999px;
   padding: 11px 20px;
-  box-shadow: inset 0 1px #eef4e40a;
+  box-shadow: inset 0 1px var(--glyph-hot)0a;
 }
 
 .word-field-label {
@@ -186,7 +208,7 @@ a {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #e2ebdb66;
+  color: var(--glyph-rest)66;
 }
 
 .word-field input {
@@ -202,14 +224,26 @@ a {
 }
 
 .word-field:focus-within {
-  border-color: #eef4e42e;
+  border-color: var(--glyph-hot)2e;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .hero-hint {
   font-family: var(--sans);
   font-size: 12px;
   letter-spacing: 0.04em;
-  color: #e2ebdb4d;
+  color: var(--glyph-rest)4d;
   margin: 20px 0 0;
 }
 
@@ -228,22 +262,22 @@ a {
 
 .btn-solid {
   background: var(--glyph-hot);
-  color: #121813;
+  color: var(--bg);
   border-color: var(--glyph-hot);
 }
 
 .btn-solid:hover {
-  background: #cde9d8;
+  background: var(--accent-mint);
 }
 
 .btn-ghost {
-  color: #e2ebdb;
-  border-color: #eef4e42e;
+  color: var(--glyph-rest);
+  border-color: var(--glyph-hot)2e;
 }
 
 .btn-ghost:hover {
-  border-color: #eef4e466;
-  background: #eef4e40a;
+  border-color: var(--glyph-hot)66;
+  background: var(--glyph-hot)0a;
 }
 
 .mini-btn {
@@ -251,9 +285,9 @@ a {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #e2ebdb80;
+  color: var(--glyph-rest)80;
   background: transparent;
-  border: 1px solid #eef4e424;
+  border: 1px solid var(--glyph-hot)24;
   border-radius: 999px;
   padding: 6px 16px;
   cursor: pointer;
@@ -263,7 +297,7 @@ a {
 
 .mini-btn:hover {
   color: var(--glyph-hot);
-  border-color: #eef4e455;
+  border-color: var(--glyph-hot)55;
 }
 
 /* ---------- sections ---------- */
@@ -293,7 +327,7 @@ a {
 
 .section .lead {
   font-family: var(--sans);
-  color: #e2ebdb8f;
+  color: var(--glyph-rest)8f;
   font-size: 15px;
   line-height: 1.65;
   max-width: 64ch;
@@ -311,9 +345,9 @@ a {
 .demo-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid #eef4e414;
+  border: 1px solid var(--glyph-hot)14;
   border-radius: var(--radius);
-  box-shadow: inset 0 1px #eef4e40a;
+  box-shadow: inset 0 1px var(--glyph-hot)0a;
   background: var(--bg);
   display: flex;
   flex-direction: column;
@@ -342,14 +376,14 @@ a {
 .demo-link {
   font-family: var(--mono);
   font-size: 12px;
-  color: #e2ebdb80;
+  color: var(--glyph-rest)80;
   letter-spacing: 0.01em;
 }
 
 .demo-colophon {
   font-family: var(--sans);
   font-size: 11px;
-  color: #e2ebdb52;
+  color: var(--glyph-rest)52;
   text-align: right;
   margin: 0;
 }
@@ -375,8 +409,8 @@ a {
 }
 
 .step {
-  background: #0d120e;
-  border: 1px solid #eef4e414;
+  background: var(--surface);
+  border: 1px solid var(--glyph-hot)14;
   border-radius: var(--radius);
   padding: 24px;
 }
@@ -399,28 +433,28 @@ a {
   font-family: var(--sans);
   font-size: 13.5px;
   line-height: 1.6;
-  color: #e2ebdb8f;
+  color: var(--glyph-rest)8f;
   margin: 0;
 }
 
 /* ---------- install ---------- */
 
 .codeblock {
-  background: #0a0f0b;
-  border: 1px solid #eef4e414;
+  background: var(--surface-raised);
+  border: 1px solid var(--glyph-hot)14;
   border-radius: var(--radius);
   padding: 20px clamp(18px, 2.5vw, 28px);
   overflow-x: auto;
   font-family: var(--mono);
   font-size: 13.5px;
   line-height: 1.75;
-  color: #e2ebdb;
+  color: var(--glyph-rest);
 }
 
-.codeblock .dim { color: #e2ebdb4d; }
+.codeblock .dim { color: var(--glyph-rest)4d; }
 .codeblock .src { color: var(--accent); }
-.codeblock .path { color: #e2ac80; }
-.codeblock .comment { color: #e2ebdb4d; }
+.codeblock .path { color: var(--accent-orange); }
+.codeblock .comment { color: var(--glyph-rest)4d; }
 
 .copy-wrap {
   position: relative;
@@ -434,9 +468,9 @@ a {
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #e2ebdb80;
+  color: var(--glyph-rest)80;
   background: transparent;
-  border: 1px solid #eef4e424;
+  border: 1px solid var(--glyph-hot)24;
   border-radius: 999px;
   padding: 5px 13px;
   cursor: pointer;
@@ -445,7 +479,7 @@ a {
 
 .copy-btn:hover {
   color: var(--glyph-hot);
-  border-color: #eef4e455;
+  border-color: var(--glyph-hot)55;
 }
 
 .copy-btn.copied {
@@ -459,8 +493,8 @@ a {
 }
 
 .download-card {
-  background: #0d120e;
-  border: 1px solid #eef4e414;
+  background: var(--surface);
+  border: 1px solid var(--glyph-hot)14;
   border-radius: var(--radius);
   padding: clamp(24px, 4vw, 40px);
   display: flex;
@@ -478,7 +512,7 @@ a {
 .download-meta {
   font-family: var(--mono);
   font-size: 12px;
-  color: #e2ebdb66;
+  color: var(--glyph-rest)66;
   letter-spacing: 0.02em;
   margin: 0;
 }
@@ -498,7 +532,7 @@ a {
   font-family: var(--sans);
   font-size: 14px;
   line-height: 1.6;
-  color: #e2ebdbb3;
+  color: var(--glyph-rest)b3;
   text-align: left;
   padding-left: 30px;
   position: relative;
@@ -523,7 +557,7 @@ a {
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.04em;
-  color: #e2ebdb4d;
+  color: var(--glyph-rest)4d;
   margin: 6px 0 0;
   width: 100%;
   text-align: left;
@@ -535,7 +569,7 @@ a {
 
 .api-note {
   font-family: var(--sans);
-  color: #e2ebdb8f;
+  color: var(--glyph-rest)8f;
   font-size: 13.5px;
   line-height: 1.6;
   margin: 4px 0 26px;
@@ -551,19 +585,19 @@ table {
 
 th {
   text-align: left;
-  color: #e2ebdb66;
+  color: var(--glyph-rest)66;
   font-weight: 500;
   font-size: 11px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   padding: 10px 12px;
-  border-bottom: 1px solid #eef4e414;
+  border-bottom: 1px solid var(--glyph-hot)14;
 }
 
 td {
   padding: 12px;
-  border-bottom: 1px solid #eef4e40f;
-  color: #e2ebdb;
+  border-bottom: 1px solid var(--glyph-hot)0f;
+  color: var(--glyph-rest);
   vertical-align: top;
 }
 
@@ -573,7 +607,7 @@ td code {
 }
 
 td .mono-hint {
-  color: #e2ebdb66;
+  color: var(--glyph-rest)66;
 }
 
 /* ---------- the footer (inspired by pols.dev) ---------- */
@@ -584,7 +618,7 @@ td .mono-hint {
   border-top-right-radius: var(--radius);
   position: relative;
   overflow: hidden;
-  box-shadow: inset 0 1px #eef4e40f, 0 -20px 44px -22px #0000008c;
+  box-shadow: inset 0 1px var(--glyph-hot)0f, 0 -20px 44px -22px var(--ink)8c;
   background: var(--bg);
   flex-direction: column;
   display: flex;
@@ -614,7 +648,7 @@ td .mono-hint {
 .ias-footLink {
   font-family: var(--mono);
   letter-spacing: 0.01em;
-  color: #e2ebdb80;
+  color: var(--glyph-rest)80;
   font-size: 13px;
   text-decoration: none;
   transition: color 0.16s;
@@ -626,7 +660,7 @@ td .mono-hint {
 
 .ias-colophon {
   font-family: var(--sans);
-  color: #e2ebdb61;
+  color: var(--glyph-rest)61;
   text-align: right;
   margin: 0;
   font-size: 12px;

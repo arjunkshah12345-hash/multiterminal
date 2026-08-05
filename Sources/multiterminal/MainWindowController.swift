@@ -42,6 +42,7 @@ final class ContentViewController: NSViewController {
         projectLabel.font = .systemFont(ofSize: 13, weight: .semibold)
         projectLabel.textColor = Brand.terminalText
         projectLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        projectLabel.setAccessibilityLabel("Current project")
         toolbar.addSubview(projectLabel)
 
         pathLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -50,6 +51,7 @@ final class ContentViewController: NSViewController {
         pathLabel.lineBreakMode = .byTruncatingMiddle
         pathLabel.cell?.truncatesLastVisibleLine = true
         pathLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        pathLabel.setAccessibilityLabel("Working directory")
         toolbar.addSubview(pathLabel)
 
         layoutControl.translatesAutoresizingMaskIntoConstraints = false
@@ -57,6 +59,7 @@ final class ContentViewController: NSViewController {
         layoutControl.selectItem(at: Layout.allCases.firstIndex(of: Settings.shared.layoutMode) ?? 0)
         layoutControl.font = .systemFont(ofSize: 11, weight: .medium)
         layoutControl.toolTip = "Choose the pane arrangement"
+        layoutControl.setAccessibilityLabel("Pane layout")
         layoutControl.target = self
         layoutControl.action = #selector(handleLayoutChange)
         toolbar.addSubview(layoutControl)
@@ -65,9 +68,10 @@ final class ContentViewController: NSViewController {
         newTerminalButton.isBordered = false
         newTerminalButton.contentTintColor = Brand.accent
         newTerminalButton.title = "New"
-        newTerminalButton.image = NSImage(systemSymbolName: "plus.square", accessibilityDescription: nil)
+        newTerminalButton.image = NSImage(systemSymbolName: "plus.square", accessibilityDescription: "New terminal")
         newTerminalButton.imagePosition = .imageLeading
         newTerminalButton.toolTip = "New terminal (⌘T)"
+        newTerminalButton.setAccessibilityLabel("New terminal")
         newTerminalButton.target = self
         newTerminalButton.action = #selector(handleNewTerminal)
         toolbar.addSubview(newTerminalButton)

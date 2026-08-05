@@ -271,6 +271,7 @@ final class SettingsViewController: NSViewController {
 
         let doneButton = NSButton(title: "Done", target: self, action: #selector(close))
         doneButton.keyEquivalent = "\r"
+        doneButton.setAccessibilityLabel("Close settings")
 
         view.addSubview(appearanceLabel)
         view.addSubview(appearanceControl)
