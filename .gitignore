@@ -3,4 +3,5 @@
 *.xcodeproj/
 *.app/
 .vercel/
+graphify-out/
 .DS_Store

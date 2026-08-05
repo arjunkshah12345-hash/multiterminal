@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let store = Store()
     private var splitVC: MainSplitViewController!
     private var windowController: MainWindowController!
+    private var mcpServer: MCPServer!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         splitVC = MainSplitViewController()
@@ -15,8 +16,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         windowController = MainWindowController(splitViewController: splitVC)
         windowController.window?.makeKeyAndOrderFront(nil)
 
+        mcpServer = MCPServer(store: store) { [weak self] session in
+            guard let self else { return }
+            self.windowController.window?.makeKeyAndOrderFront(nil)
+            DispatchQueue.main.async { [weak self] in
+                self?.splitVC.contentVC.grid.focus(session)
+            }
+        }
+        mcpServer.start()
+
         NSApp.mainMenu = buildMainMenu()
         NSApp.activate(ignoringOtherApps: true)
+        CommandNotificationCenter.shared.requestAuthorization()
 
         // Apply persisted settings (appearance + font) and react to live changes.
         Settings.shared.onChange = { [weak self] in self?.applySettings() }
@@ -25,6 +36,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         true
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        mcpServer?.stop()
     }
 
     // MARK: Menu actions
@@ -44,9 +59,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.store.addProject(fromFolder: url)
         }
     }
-    @objc private func newTerminal(_ sender: Any?) { store.addTerminal() }
+    @objc private func newTerminal(_ sender: Any?) {
+        // Continue where you are: a new pane opens in the focused pane's directory
+        // (when known) instead of always falling back to the project root.
+        let cwd = splitVC.contentVC.grid.focusedPane().flatMap { pane -> String? in
+            store.projects
+                .flatMap { $0.sessions }
+                .first { $0.pane === pane }?
+                .workingDirectory
+        }
+        store.addTerminal(in: cwd)
+    }
     @objc private func closeTerminal(_ sender: Any?) { splitVC.closeFocusedTerminal() }
+    @objc private func clearScreen(_ sender: Any?) { splitVC.contentVC.grid.clearFocusedScreen() }
+    @objc private func focusNextPane(_ sender: Any?) { splitVC.contentVC.grid.focusNext() }
+    @objc private func focusPreviousPane(_ sender: Any?) { splitVC.contentVC.grid.focusPrevious() }
     @objc private func presentSettings(_ sender: Any?) { splitVC.presentSettings() }
+    @objc private func toggleSessionQuickView(_ sender: Any?) { splitVC.toggleSessionQuickView() }
     @objc private func about(_ sender: Any?) {
         NSApp.orderFrontStandardAboutPanel(options: [
             .applicationName: "Multiterminal",
@@ -55,10 +84,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ])
     }
 
-    /// Apply appearance to the window and the current font to all terminals.
+    /// Apply the persisted workspace appearance to the window and every live terminal.
     private func applySettings() {
         splitVC.applyAppearance()
+        splitVC.applyThemeToChrome()
+        splitVC.contentVC.applySettings()
         store.applyFontToAll()
+        store.applyThemeToAll()
     }
 
     // MARK: Main menu
@@ -70,6 +102,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let appMenuItem = NSMenuItem()
         appMenuItem.submenu = menu(titled: "Multiterminal", items: [
             .standard("About Multiterminal", #selector(about), ""),
+            .target("Copy MCP Configuration", #selector(copyMCPConfiguration), ""),
             .separator,
             .target("Settings…", #selector(presentSettings), ","),
             .separator,
@@ -92,13 +125,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ])
         mainMenu.addItem(fileMenuItem)
 
+        // View menu
+        let viewMenuItem = NSMenuItem()
+        viewMenuItem.submenu = menu(titled: "View", items: [
+            .target("Focus Next Pane", #selector(focusNextPane), "]"),
+            .target("Focus Previous Pane", #selector(focusPreviousPane), "["),
+            .separator,
+            .targetWithModifiers("Session Quick View", #selector(toggleSessionQuickView), "p", [.command, .shift])
+        ])
+        mainMenu.addItem(viewMenuItem)
+
         // Edit menu — standard selectors the terminal (responder chain) implements.
         let editMenuItem = NSMenuItem()
         editMenuItem.submenu = menu(titled: "Edit", items: [
             .systemAction("Cut", NSSelectorFromString("cut:"), "x"),
             .systemAction("Copy", NSSelectorFromString("copy:"), "c"),
             .systemAction("Paste", NSSelectorFromString("paste:"), "v"),
-            .systemAction("Select All", NSSelectorFromString("selectAll:"), "a")
+            .systemAction("Select All", NSSelectorFromString("selectAll:"), "a"),
+            .target("Clear Screen", #selector(clearScreen), "k")
         ])
         mainMenu.addItem(editMenuItem)
 
@@ -114,8 +158,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return mainMenu
     }
 
+    @objc private func copyMCPConfiguration(_ sender: Any?) {
+        mcpServer.copyConfigurationToPasteboard()
+    }
+
     private enum ItemSpec {
         case target(String, Selector, String)
+        case targetWithModifiers(String, Selector, String, NSEvent.ModifierFlags)
         case systemAction(String, Selector, String, NSEvent.ModifierFlags = .command)
         case standard(String, Selector, String)
         case separator
@@ -130,6 +179,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             case let .target(name, action, key):
                 let item = NSMenuItem(title: name, action: action, keyEquivalent: key)
                 item.target = self
+                menu.addItem(item)
+            case let .targetWithModifiers(name, action, key, modifiers):
+                let item = NSMenuItem(title: name, action: action, keyEquivalent: key)
+                item.target = self
+                item.keyEquivalentModifierMask = modifiers
                 menu.addItem(item)
             case let .systemAction(name, action, key, mods):
                 let item = NSMenuItem(title: name, action: action, keyEquivalent: key)

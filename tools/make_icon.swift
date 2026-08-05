@@ -1,6 +1,6 @@
 // make_icon.swift
 // Renders the Multiterminal app icon (1024x1024 PNG) using AppKit drawing:
-// an indigo→violet squircle with an abstract overlapping "layered panes" monogram.
+// a black terminal canvas with a composed pane frame and a high-contrast prompt mark.
 //
 // Usage: swift tools/make_icon.swift <output.png>
 import AppKit
@@ -24,46 +24,52 @@ NSGraphicsContext.current = gs
 
 let full = NSRect(x: 0, y: 0, width: size, height: size)
 
-// 1) Squircle background with indigo→violet gradient.
+// 1) Squircle background with a black / forest gradient.
 let corner = CGFloat(size) * 0.2237
 let squircle = NSBezierPath(roundedRect: full, xRadius: corner, yRadius: corner)
-let indigo = NSColor(srgbRed: 0.396, green: 0.420, blue: 0.902, alpha: 1) // #6557e6
-let violet = NSColor(srgbRed: 0.580, green: 0.400, blue: 0.918, alpha: 1) // #9466ea
-let deep   = NSColor(srgbRed: 0.208, green: 0.153, blue: 0.490, alpha: 1)
-let bgGradient = NSGradient(colorsAndLocations: (indigo, 0.0),
-                                            (violet, 0.55),
+let forest = NSColor(srgbRed: 0.063, green: 0.102, blue: 0.086, alpha: 1) // #101a16
+let green  = NSColor(srgbRed: 0.110, green: 0.290, blue: 0.251, alpha: 1) // #1c4a40
+let deep   = NSColor(srgbRed: 0.024, green: 0.039, blue: 0.031, alpha: 1) // #060a08
+let bgGradient = NSGradient(colorsAndLocations: (forest, 0.0),
+                                            (green, 0.55),
                                             (deep, 1.0))!
 bgGradient.draw(in: squircle, angle: -65)
 
-// 2) Abstract monogram: three overlapping rounded "panes", rotated diagonally.
-func drawPane(center: NSPoint, side: CGFloat, alpha: CGFloat, angle: CGFloat) {
-    let half = side / 2
-    let paneRect = NSRect(x: center.x - half, y: center.y - half, width: side, height: side)
-    let path = NSBezierPath(roundedRect: paneRect, xRadius: side * 0.26, yRadius: side * 0.26)
-
-    NSGraphicsContext.saveGraphicsState()
-    let t = NSAffineTransform()
-    t.translateX(by: center.x, yBy: center.y)
-    t.rotate(byDegrees: angle)
-    t.translateX(by: -center.x, yBy: -center.y)
-    t.concat()
-    NSColor(white: 1.0, alpha: alpha).setFill()
-    path.fill()
-    NSGraphicsContext.restoreGraphicsState()
-}
-
-// Soft outer glow behind the mark for depth.
-let glowRect = NSRect(x: 200, y: 150, width: 624, height: 624)
-let glow = NSBezierPath(roundedRect: glowRect, xRadius: 160, yRadius: 160)
-NSColor(white: 1.0, alpha: 0.06).setFill()
+// 2) Quiet glow behind the mark.
+let glow = NSBezierPath(ovalIn: NSRect(x: 176, y: 168, width: 672, height: 672))
+NSColor(srgbRed: 0.47, green: 0.80, blue: 0.75, alpha: 0.12).setFill()
 glow.fill()
 
-// Top (back) pane — large, mostly transparent, upper-left.
-drawPane(center: NSPoint(x: 460, y: 600), side: 470, alpha: 0.28, angle: -12)
-// Middle pane — solid.
-drawPane(center: NSPoint(x: 515, y: 500), side: 400, alpha: 0.92, angle: -12)
-// Front pane — solid, lower-right.
-drawPane(center: NSPoint(x: 590, y: 392), side: 300, alpha: 1.0, angle: -12)
+// 3) Composed pane frame: one outer boundary, two internal axes, one prompt.
+let frame = NSBezierPath(roundedRect: NSRect(x: 196, y: 228, width: 632, height: 568),
+                         xRadius: 92, yRadius: 92)
+frame.lineWidth = 30
+NSColor(white: 1.0, alpha: 0.15).setStroke()
+frame.stroke()
+
+let axes = NSBezierPath()
+axes.move(to: NSPoint(x: 512, y: 262))
+axes.line(to: NSPoint(x: 512, y: 762))
+axes.move(to: NSPoint(x: 230, y: 512))
+axes.line(to: NSPoint(x: 794, y: 512))
+axes.lineWidth = 18
+NSColor(white: 1.0, alpha: 0.10).setStroke()
+axes.stroke()
+
+let prompt = NSBezierPath()
+prompt.move(to: NSPoint(x: 338, y: 434))
+prompt.line(to: NSPoint(x: 464, y: 540))
+prompt.line(to: NSPoint(x: 338, y: 646))
+prompt.lineWidth = 46
+prompt.lineCapStyle = .round
+prompt.lineJoinStyle = .round
+NSColor(white: 1.0, alpha: 0.98).setStroke()
+prompt.stroke()
+
+let cursor = NSBezierPath(roundedRect: NSRect(x: 532, y: 620, width: 176, height: 46),
+                          xRadius: 23, yRadius: 23)
+NSColor(srgbRed: 0.47, green: 0.80, blue: 0.75, alpha: 1.0).setFill()
+cursor.fill()
 
 gs.flushGraphics()
 NSGraphicsContext.restoreGraphicsState()

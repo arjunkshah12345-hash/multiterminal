@@ -18,6 +18,11 @@ let package = Package(
                 .product(name: "SwiftTerm", package: "SwiftTerm")
             ],
             path: "Sources/multiterminal"
+        ),
+        .testTarget(
+            name: "multiterminalTests",
+            dependencies: ["multiterminal"],
+            path: "Tests/multiterminalTests"
         )
     ],
     swiftLanguageVersions: [.v5]

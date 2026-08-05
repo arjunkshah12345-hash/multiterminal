@@ -1,174 +1,352 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Multiterminal — Your command line, in one beautiful pane</title>
-<meta name="description" content="Multiterminal is a fast, native macOS app that turns every terminal you need into a clean, auto-arranging grid — with a project sidebar, real shells, your history, resizable panes, and more." />
-<meta property="og:title" content="Multiterminal — Your command line, in one beautiful pane" />
-<meta property="og:description" content="A tiny, fast, native macOS multi-pane terminal with a project sidebar." />
-<meta property="og:type" content="website" />
-<meta property="og:image" content="/assets/app-icon.png" />
-<link rel="icon" type="image/png" href="/assets/app-icon.png" />
-<link rel="stylesheet" href="styles.css" />
-</head>
-<body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>multiterminal · every shell, one surface</title>
+    <meta
+      name="description"
+      content="Multiterminal is the native macOS workspace for real shells, project folders, composed terminal panes, and customizable themes."
+    />
+    <meta name="theme-color" content="#121813" />
+    <meta property="og:title" content="multiterminal · every shell, one surface" />
+    <meta
+      property="og:description"
+      content="A native macOS terminal workspace for real shells, persistent projects, editable pane layouts, and live theme switching."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/assets/brand-card.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <link rel="icon" type="image/svg+xml" href="assets/mark.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body id="top">
+    <div class="grain" aria-hidden="true"></div>
 
-<nav class="nav" id="top">
-  <div class="nav-inner">
-    <a class="brand" href="#top">
-      <img src="assets/app-icon.png" alt="Multiterminal" class="brand-logo" />
-      <span class="brand-name">Multiterminal</span>
-    </a>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#arrange">Panes</a>
-      <a href="#install">Install</a>
-      <a href="#faq">FAQ</a>
-      <a class="btn btn-primary nav-cta" href="#install">Download for macOS</a>
-    </div>
-  </div>
-</nav>
+    <header class="nav">
+      <a class="brand" href="#top">multiterminal<span class="dot">.</span></a>
+      <nav class="navlinks" aria-label="Primary navigation">
+        <a href="#demos">try it</a>
+        <a href="#demos">demos</a>
+        <a href="#how">how it works</a>
+        <a href="#install">install</a>
+        <a
+          class="hide-sm"
+          href="https://github.com/arjunkshah12345-hash/multiterminal"
+          target="_blank"
+          rel="noopener"
+        >github</a>
+      </nav>
+    </header>
 
-<header class="hero">
-  <div class="hero-glow"></div>
-  <div class="container hero-inner">
-    <div class="hero-badge"><span class="dot"></span> Free · open-source · macOS</div>
-    <h1>Your command line,<br />in <span class="grad">one beautiful pane.</span></h1>
-    <p class="hero-sub">
-      Multiterminal is a tiny, fast, native macOS app that arranges all of your terminals
-      into a clean grid. Real shells, your full history, projects in the sidebar — and zero clutter.
-    </p>
-    <div class="hero-cta">
-      <a class="btn btn-primary btn-lg" href="#install">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>
-        Download for macOS
-      </a>
-      <a class="btn btn-ghost btn-lg" href="https://github.com/arjunkshah12345-hash/multiterminal" target="_blank" rel="noopener">Star on GitHub</a>
-    </div>
-    <div class="hero-proof">
-      <span>Native &amp; local-first</span> · <span>No Electron, no webviews</span>
-    </div>
-  </div>
-</header>
+    <main>
+      <!-- HERO -->
+      <section class="hero" id="try">
+        <p class="kicker">multiterminal · the native macOS terminal workspace</p>
+        <h1 class="hero-title">keep every shell in a <em>single surface</em></h1>
+        <div class="hero-wordmark" id="hero-wordmark" aria-label="Multiterminal animated wordmark"></div>
+        <div class="hero-bar">
+          <label class="word-field" for="hero-word">
+            <span class="word-field-label">your workspace</span>
+            <input
+              id="hero-word"
+              type="text"
+              spellcheck="false"
+              autocomplete="off"
+              maxlength="40"
+              value="multiterminal"
+            />
+          </label>
+          <button class="mini-btn" id="hero-scan" type="button">scan</button>
+          <a class="btn btn-solid" href="#install">install</a>
+        </div>
+        <p class="hero-hint">hover to glow · scan to sweep · share with ?w=yourword</p>
+      </section>
 
-<section class="appshot">
-  <div class="container">
-    <img class="mockup" src="assets/app-mockup.svg" alt="Multiterminal app showing a project sidebar and a 2x2 grid of terminals" />
-  </div>
-</section>
+      <!-- DEMOS -->
+      <section class="section" id="demos">
+        <p class="index">02 · demos</p>
+        <h2>one surface, every context</h2>
+        <p class="lead">
+          Each card is the same Multiterminal idea in a different mode. Keep a server,
+          logs, tests, and a second project visible without turning your desktop into tabs.
+        </p>
+        <div class="demos" id="demos-grid"></div>
+      </section>
 
-<section class="section" id="features">
-  <div class="container">
-    <h2 class="section-title">Everything, where it belongs.</h2>
-    <p class="section-sub">One window for every shell you need.</p>
-    <div class="grid">
-      <div class="card">
-        <div class="card-ico" data-ico="grid">▦</div>
-        <h3>Auto-arranging panes</h3>
-        <p>Open one terminal, two, four, nine — they balance themselves into a tidy grid. No manual tiling, no tab shuffle.</p>
+      <!-- HOW -->
+      <section class="section" id="how">
+        <p class="index">03 · how it works</p>
+        <h2>root. compose. return.</h2>
+        <p class="lead">
+          The app stays small because the model stays clear: projects own folders,
+          panes own real shells, and the layout stays editable while you work.
+        </p>
+        <div class="steps">
+          <div class="step">
+            <div class="n">01</div>
+            <h3>Open a project</h3>
+            <p>
+              Choose a folder and it becomes a project. New panes start there, so your
+              working directory is always obvious.
+            </p>
+          </div>
+          <div class="step">
+            <div class="n">02</div>
+            <h3>Run a real shell</h3>
+            <p>
+              zsh, bash, or fish through a genuine PTY. Your aliases, environment,
+              tooling, and history stay intact.
+            </p>
+          </div>
+          <div class="step">
+            <div class="n">03</div>
+            <h3>Compose the grid</h3>
+            <p>
+              Choose auto, stack, row, grid, or 2 + 1. Drag the quiet center gutters
+              when one pane needs more room.
+            </p>
+          </div>
+          <div class="step">
+            <div class="n">04</div>
+            <h3>Build against it</h3>
+            <p>
+              The local MCP bridge exposes projects, sessions, output, focus, and safe
+              editing tools so other apps can work with the same live workspace.
+            </p>
+          </div>
+          <div class="step">
+            <div class="n">05</div>
+            <h3>Name &amp; theme</h3>
+            <p>
+              Rename any pane by double-clicking its header or right-clicking → Rename….
+              Switch themes live — Forest, Ink, Slate, Sand, or Light — and every shell,
+              scrollback, and layout keeps running.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- INSTALL -->
+      <section class="section" id="install">
+        <p class="index">04 · install</p>
+        <h2>put it on your mac</h2>
+        <p class="lead">
+          No account, no cloud setup, no App Store. Download the app and drag it into
+          Applications — or build it from source. macOS 12+, Apple Silicon &amp; Intel.
+        </p>
+
+        <div class="install-stack">
+          <div class="download-card">
+            <a class="btn btn-solid btn-lg" href="downloads/Multiterminal.dmg" download>Download for Mac</a>
+            <p class="download-meta">~3&nbsp;MB · free · no Apple Developer ID required</p>
+            <ol class="install-steps">
+              <li>Open <code>Multiterminal.dmg</code> and drag <strong>Multiterminal</strong> into <strong>Applications</strong>.</li>
+              <li>In Applications, right-click <strong>Multiterminal</strong> → <strong>Open</strong> the first time. This clears Gatekeeper once (the app isn’t notarized).</li>
+              <li>Launch it any time from Launchpad or Spotlight.</li>
+            </ol>
+            <p class="install-tip">Power-user one-liner — copy the app and clear quarantine from the terminal:</p>
+            <div class="copy-wrap">
+              <button class="copy-btn" type="button">copy</button>
+              <pre class="codeblock"><span class="dim"># mount the dmg, install, clear Gatekeeper quarantine</span>
+$ cp -R /Volumes/Multiterminal/Multiterminal.app /Applications &amp;&amp; \
+  hdiutil detach /Volumes/Multiterminal &amp;&amp; \
+  xattr -dr com.apple.quarantine /Applications/Multiterminal.app</pre>
+            </div>
+          </div>
+
+          <div class="copy-wrap">
+            <button class="copy-btn" type="button">copy</button>
+            <pre class="codeblock"><span class="dim"># clone and run</span>
+$ git clone https://github.com/arjunkshah12345-hash/multiterminal.git
+$ cd multiterminal
+$ swift run</pre>
+          </div>
+
+          <p class="api-note">
+            <code>Swift + AppKit</code> with SwiftTerm underneath. Build from source,
+            inspect what runs, and keep your projects where they already live. macOS 12+
+            and Swift 5.9+.
+          </p>
+
+          <div class="copy-wrap">
+            <button class="copy-btn" type="button">copy</button>
+            <pre class="codeblock"><span class="dim"># connect an MCP client</span>
+{
+  <span class="src">"mcpServers"</span>: {
+    <span class="src">"multiterminal"</span>: {
+      <span class="src">"url"</span>: <span class="path">"http://127.0.0.1:17442/mcp"</span>
+    }
+  }
+}</pre>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>shortcut</th>
+              <th>surface</th>
+              <th>default</th>
+              <th>meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>⌘T</code></td>
+              <td>terminal</td>
+              <td>new</td>
+              <td>open a pane in the current project</td>
+            </tr>
+            <tr>
+              <td><code>⌘O</code></td>
+              <td>project</td>
+              <td>folder</td>
+              <td>open a folder as a project</td>
+            </tr>
+            <tr>
+              <td><code>⌘⇧P</code></td>
+              <td>quick view</td>
+              <td>floating</td>
+              <td>jump across every session</td>
+            </tr>
+            <tr>
+              <td><code>⌘W</code></td>
+              <td>terminal</td>
+              <td>close</td>
+              <td>close the focused pane without moving focus</td>
+            </tr>
+            <tr>
+              <td><code>⌘K</code></td>
+              <td>terminal</td>
+              <td>clear</td>
+              <td>clear the focused pane's screen</td>
+            </tr>
+            <tr>
+              <td><code>⌘]</code></td>
+              <td>focus</td>
+              <td>next</td>
+              <td>move keyboard focus to the next pane</td>
+            </tr>
+            <tr>
+              <td><code>⌘[</code></td>
+              <td>focus</td>
+              <td>prev</td>
+              <td>move keyboard focus to the previous pane</td>
+            </tr>
+            <tr>
+              <td><code>⌘,</code></td>
+              <td>settings</td>
+              <td>live</td>
+              <td>change theme, appearance, and type size</td>
+            </tr>
+            <tr>
+              <td><code>double-click</code></td>
+              <td>pane</td>
+              <td>header</td>
+              <td>rename the focused pane</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <!-- THE FOOTER -->
+    <footer class="ias-footer">
+      <div class="ias-footGrain" aria-hidden="true"></div>
+      <div class="ias-footTop">
+        <a class="ias-footLink" href="#top">multiterminal</a>
+        <p class="ias-colophon">real shells. one composed surface.</p>
       </div>
-      <div class="card">
-        <div class="card-ico" data-ico="folder">▸</div>
-        <h3>Projects as folders</h3>
-        <p>Open a folder and it becomes a project. Every pane roots at that folder, and choosing a working directory names it for you.</p>
-      </div>
-      <div class="card">
-        <div class="card-ico" data-ico="term">&gt;_</div>
-        <h3>Real shells, full history</h3>
-        <p>Each pane is a real PTY running your login shell. Your history, aliases, and tools all just work. Restart and it reopens your projects.</p>
-      </div>
-      <div class="card">
-        <div class="card-ico" data-ico="resize">⇿</div>
-        <h3>Resize &amp; organize</h3>
-        <p>Drag dividers to resize any pane. Drag panes around, or move a terminal to another project — right from its header.</p>
-      </div>
-      <div class="card">
-        <div class="card-ico" data-ico="persist">↺</div>
-        <h3>Pick up where you left off</h3>
-        <p>Close and relaunch and Multiterminal restores your projects, folders, and pane layouts from your last session.</p>
-      </div>
-      <div class="card">
-        <div class="card-ico" data-ico="style">◑</div>
-        <h3>Style it your way</h3>
-        <p>System, light, or dark chrome, plus a terminal font size that fits you — all in one settings sheet. ⌘,</p>
-      </div>
-    </div>
-  </div>
-</section>
+      <div class="ias-wordmark" id="wordmark" aria-label="Multiterminal animated ASCII wordmark"></div>
+    </footer>
 
-<section class="section alt" id="arrange">
-  <div class="container narrow">
-    <h2 class="section-title">Panes that stay out of your way</h2>
-    <img class="diagram" src="assets/layout.svg" alt="Layout diagram: 1, 2, 3, 4, 6 and 9 panes auto-arranged in grids" />
-    <p class="section-sub">The more you open, the more it contains — left to right, top to bottom. Drag any divider to give a pane more room.</p>
-  </div>
-</section>
+    <script src="https://interascii.ideatr.dev/wordmark.js"></script>
+    <script>
+      const DEMOS = [
+        { word: "dev-server", note: "real pty" },
+        { word: "project-a", note: "folder rooted" },
+        { word: "tests", note: "watching" },
+        { word: "api", note: "history intact" },
+        { word: "logs", note: "always visible" },
+        { word: "multiterminal", note: "open source" },
+      ];
 
-<section class="section" id="install">
-  <div class="container narrow">
-    <h2 class="section-title">Install in under a minute</h2>
-    <p class="section-sub">Requires macOS 12+ and the Swift toolchain.</p>
-    <div class="codeblock">
-<pre><code><span class="c"># Build &amp; run (first run fetches SwiftTerm, then it's instant)</span>
-git clone https://github.com/arjunkshah12345-hash/multiterminal.git
-cd multiterminal
-swift run
+      function buildDemos() {
+        const grid = document.getElementById("demos-grid");
+        for (const demo of DEMOS) {
+          const card = document.createElement("div");
+          card.className = "demo-card";
 
-<span class="c"># Or build a double-clickable .app with the icon</span>
-sh tools/build_app.sh release
-open Multiterminal.app</code></pre>
-    </div>
-    <div class="install-keys">
-      <span><b>⌘T</b> new terminal</span>
-      <span><b>⌘N</b> new project</span>
-      <span><b>⌘O</b> open folder as project</span>
-      <span><b>⌘,</b> settings</span>
-      <span><b>⌘W</b> close terminal</span>
-    </div>
-  </div>
-</section>
+          const grain = document.createElement("div");
+          grain.className = "card-grain";
+          grain.setAttribute("aria-hidden", "true");
+          card.appendChild(grain);
 
-<section class="section alt" id="faq">
-  <div class="container narrow">
-    <h2 class="section-title">FAQ</h2>
-    <details class="faq"><summary>Is it a real terminal, or just a fake UI?</summary>
-      Real. Every pane is a genuine PTY running your login shell — zsh, bash, fish, whatever you use. Commands, history, and tools all behave exactly as expected.</details>
-    <details class="faq"><summary>Does it reopen my work after I quit?</summary>
-      Yes. On relaunch, Multiterminal restores your projects, their folders, and how many panes each had. Shell history lives in your normal history file, so it's there too.</details>
-    <details class="faq"><summary>Can I resize or reorganize panes?</summary>
-      Yes — drag any divider to resize, or right-click a pane header to move it left/right or into another project.</details>
-    <details class="faq"><summary>Is my data local?</summary>
-      Fully local. No account, no cloud, no telemetry. Your projects are stored in your user defaults and folders stay exactly where you put them.</details>
-    <details class="faq"><summary>How is it so fast and small?</summary>
-      Native Swift + AppKit using the SwiftTerm terminal engine. No Electron, no browser, no webview — a single lightweight native binary.</details>
-  </div>
-</section>
+          const top = document.createElement("div");
+          top.className = "demo-top";
+          top.innerHTML =
+            '<span class="demo-link">' + demo.word + "</span>" +
+            '<p class="demo-colophon">' + demo.note + "</p>";
+          card.appendChild(top);
 
-<section class="final-cta">
-  <div class="container">
-    <h2>Give your terminals a real home.</h2>
-    <p>Free, native, open source — built for people who live in the command line.</p>
-    <div class="hero-cta">
-      <a class="btn btn-primary btn-lg" href="#install">Download for macOS</a>
-      <a class="btn btn-ghost btn-lg" href="https://github.com/arjunkshah12345-hash/multiterminal" target="_blank" rel="noopener">GitHub</a>
-    </div>
-  </div>
-</section>
+          const wordmark = document.createElement("div");
+          wordmark.className = "demo-wm";
+          card.appendChild(wordmark);
 
-<footer class="footer">
-  <div class="container footer-inner">
-    <span class="brand"><img src="assets/app-icon.png" class="brand-logo" alt="" /> Multiterminal</span>
-    <div class="footer-links">
-      <a href="#features">Features</a>
-      <a href="#install">Install</a>
-      <a href="#faq">FAQ</a>
-      <a href="https://github.com/arjunkshah12345-hash/multiterminal" target="_blank" rel="noopener">GitHub</a>
-    </div>
-    <span class="footer-note">© 2026 ideatr · Made native, kept simple.</span>
-  </div>
-</footer>
+          const scan = document.createElement("button");
+          scan.type = "button";
+          scan.className = "mini-btn";
+          scan.textContent = "scan";
+          scan.addEventListener("click", () => wordmark.dispatchEvent(new Event("interascii:scan")));
+          card.appendChild(scan);
 
-<script src="script.js"></script>
-</body>
+          grid.appendChild(card);
+          mountWordmark(wordmark, demo.word);
+        }
+      }
+
+      const hero = document.getElementById("hero-wordmark");
+      const heroInput = document.getElementById("hero-word");
+      let teardown = mountWordmark(hero, heroInput.value);
+
+      function applyHero() {
+        const word = heroInput.value.trim() || "multiterminal";
+        teardown?.();
+        teardown = mountWordmark(hero, word);
+        history.replaceState(null, "", "?w=" + encodeURIComponent(word));
+      }
+
+      let inputTimer;
+      heroInput.addEventListener("input", () => {
+        clearTimeout(inputTimer);
+        inputTimer = setTimeout(applyHero, 120);
+      });
+      document
+        .getElementById("hero-scan")
+        .addEventListener("click", () => hero.dispatchEvent(new Event("interascii:scan")));
+      document.querySelectorAll(".copy-btn").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const code = button.parentElement.querySelector("pre").innerText;
+          try {
+            await navigator.clipboard.writeText(code.trim());
+            button.textContent = "copied";
+            button.classList.add("copied");
+          } catch {
+            button.textContent = "copy";
+          }
+          setTimeout(() => {
+            button.textContent = "copy";
+            button.classList.remove("copied");
+          }, 1400);
+        });
+      });
+      buildDemos();
+
+      // load the engine
+      const root = document.getElementById("wordmark");
+      mountWordmark(root, "multiterminal");
+    </script>
+  </body>
 </html>

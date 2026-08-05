@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Multiterminal mark</title>
+  <desc id="desc">A composed terminal frame with a prompt chevron and cursor.</desc>
+  <defs>
+    <linearGradient id="bg" x1="20" y1="20" x2="236" y2="236" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#101a16"/>
+      <stop offset=".56" stop-color="#1c4a40"/>
+      <stop offset="1" stop-color="#060a08"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="57" fill="url(#bg)"/>
+  <circle cx="128" cy="128" r="84" fill="#78cdbe" opacity=".12"/>
+  <rect x="50" y="60" width="156" height="140" rx="23" fill="none" stroke="#fff" stroke-width="8" opacity=".16"/>
+  <path d="M128 68v120M58 128h140" stroke="#fff" stroke-width="5" opacity=".1"/>
+  <path d="m86 106 31 26-31 26" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="135" y="151" width="45" height="11" rx="5.5" fill="#78cdbe"/>
+</svg>

@@ -1,21 +1,6 @@
 import AppKit
 import SwiftTerm
 
-// MARK: - Grid math
-
-/// Determines rows/cols for a given pane count so the layout is as square / landscape
-/// as possible while matching the user's described rules:
-///   1 -> 1x1, 2 -> 1x2 (left|right), 3 -> 1x3 (left|middle|right),
-///   4 -> 2x2, 5 -> 2x3, 6 -> 2x3, 7 -> 3x3, 9 -> 3x3, 16 -> 4x4, ...
-/// Panes are placed left-to-right, top-to-bottom; the final row may be partial.
-func gridDimensions(_ n: Int) -> (rows: Int, cols: Int) {
-    guard n > 0 else { return (0, 0) }
-    let r = Int((sqrt(Double(n))).rounded(.down))
-    let rows = max(1, r)
-    let cols = Int((Double(n) / Double(rows)).rounded(.up))
-    return (rows, cols)
-}
-
 // MARK: - PaneContextAction
 
 enum PaneContextAction {
@@ -35,22 +20,29 @@ final class TerminalPaneView: NSView, NSMenuDelegate {
 
     var onClose: (() -> Void)?
     var onContextAction: ((PaneContextAction) -> Void)?
+    var onRename: (() -> Void)?
     var projectProvider: (() -> [(String, Project)])?
 
     private let header = NSView()
+    private let focusBar = NSView()
     private let titleLabel = NSTextField(labelWithString: "")
+    private let pathLabel = NSTextField(labelWithString: "")
     private let closeButton = NSButton()
     private let exitedTag = NSTextField(labelWithString: "")
     private var contextMenu: NSMenu!
 
-    private let headerHeight: CGFloat = 22
+    private let headerHeight: CGFloat = 24
+
+    private var isExited = false
 
     init(terminal: LocalProcessTerminalView, title: String) {
         self.terminal = terminal
         super.init(frame: .zero)
         wantsLayer = true
-        layer?.cornerRadius = 6
-        layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+        layer?.cornerRadius = 0
+        layer?.backgroundColor = Brand.ink.cgColor
+        // Flush, edge-to-edge panes: no border — just a 1px hairline between panes.
+        layer?.borderWidth = 0
 
         setupHeader(title: title)
         setupTerminal()
@@ -61,22 +53,42 @@ final class TerminalPaneView: NSView, NSMenuDelegate {
     private func setupHeader(title: String) {
         header.translatesAutoresizingMaskIntoConstraints = false
         header.wantsLayer = true
-        header.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
+        header.layer?.backgroundColor = Brand.inkRaised.cgColor
         addSubview(header)
+
+        // A 2px accent line along the very top of the focused pane — the only cue
+        // showing which terminal is active in a flush, borderless grid.
+        focusBar.translatesAutoresizingMaskIntoConstraints = false
+        focusBar.wantsLayer = true
+        focusBar.layer?.backgroundColor = Brand.accent.cgColor
+        focusBar.isHidden = true
+        addSubview(focusBar)
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.stringValue = title
-        titleLabel.font = .systemFont(ofSize: 12, weight: .medium)
-        titleLabel.textColor = .labelColor
+        titleLabel.font = .systemFont(ofSize: 12, weight: .semibold)
+        titleLabel.textColor = Brand.terminalText
         titleLabel.lineBreakMode = .byTruncatingTail
         titleLabel.cell?.truncatesLastVisibleLine = true
+        // Double-click the title to rename it.
+        let renameGesture = NSClickGestureRecognizer(target: self, action: #selector(handleRename))
+        renameGesture.numberOfClicksRequired = 2
+        titleLabel.addGestureRecognizer(renameGesture)
         header.addSubview(titleLabel)
+
+        pathLabel.translatesAutoresizingMaskIntoConstraints = false
+        pathLabel.font = .monospacedSystemFont(ofSize: 10, weight: .regular)
+        pathLabel.textColor = Brand.accent.withAlphaComponent(0.72)
+        pathLabel.lineBreakMode = .byTruncatingMiddle
+        pathLabel.cell?.truncatesLastVisibleLine = true
+        header.addSubview(pathLabel)
 
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.isBordered = false
         closeButton.isTransparent = false
-        closeButton.title = "✕"
-        closeButton.font = .systemFont(ofSize: 12, weight: .semibold)
+        closeButton.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: "Close pane")
+        closeButton.imageScaling = .scaleProportionallyDown
+        closeButton.contentTintColor = Brand.terminalText.withAlphaComponent(0.72)
         closeButton.toolTip = "Close pane"
         closeButton.target = self
         closeButton.action = #selector(handleClose)
@@ -86,7 +98,7 @@ final class TerminalPaneView: NSView, NSMenuDelegate {
         exitedTag.translatesAutoresizingMaskIntoConstraints = false
         exitedTag.isHidden = true
         exitedTag.font = .systemFont(ofSize: 10, weight: .medium)
-        exitedTag.textColor = .systemRed
+        exitedTag.textColor = NSColor.systemOrange
         header.addSubview(exitedTag)
 
         NSLayoutConstraint.activate([
@@ -95,15 +107,25 @@ final class TerminalPaneView: NSView, NSMenuDelegate {
             header.trailingAnchor.constraint(equalTo: trailingAnchor),
             header.heightAnchor.constraint(equalToConstant: headerHeight),
 
+            focusBar.topAnchor.constraint(equalTo: topAnchor),
+            focusBar.leadingAnchor.constraint(equalTo: leadingAnchor),
+            focusBar.trailingAnchor.constraint(equalTo: trailingAnchor),
+            focusBar.heightAnchor.constraint(equalToConstant: 2),
+
             titleLabel.leadingAnchor.constraint(equalTo: header.leadingAnchor, constant: 8),
             titleLabel.centerYAnchor.constraint(equalTo: header.centerYAnchor),
 
-            exitedTag.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 6),
+            exitedTag.leadingAnchor.constraint(equalTo: titleLabel.trailingAnchor, constant: 5),
             exitedTag.centerYAnchor.constraint(equalTo: header.centerYAnchor),
 
             closeButton.trailingAnchor.constraint(equalTo: header.trailingAnchor, constant: -6),
             closeButton.centerYAnchor.constraint(equalTo: header.centerYAnchor),
-            closeButton.widthAnchor.constraint(equalToConstant: 18)
+            closeButton.widthAnchor.constraint(equalToConstant: 16),
+
+            pathLabel.trailingAnchor.constraint(equalTo: closeButton.leadingAnchor, constant: -8),
+            pathLabel.centerYAnchor.constraint(equalTo: header.centerYAnchor),
+            pathLabel.leadingAnchor.constraint(greaterThanOrEqualTo: exitedTag.trailingAnchor, constant: 6),
+            pathLabel.widthAnchor.constraint(lessThanOrEqualToConstant: 240)
         ])
 
         // Context menu (right-click the header to organize/move this pane).
@@ -118,6 +140,10 @@ final class TerminalPaneView: NSView, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
+        let rename = NSMenuItem(title: "Rename…", action: #selector(handleRename), keyEquivalent: "")
+        rename.target = self
+        menu.addItem(rename)
+        menu.addItem(.separator())
         let left = NSMenuItem(title: "Move Left", action: #selector(paneMoveLeft(_:)), keyEquivalent: "")
         left.target = self
         menu.addItem(left)
@@ -142,6 +168,7 @@ final class TerminalPaneView: NSView, NSMenuDelegate {
 
     @objc private func paneMoveLeft(_ sender: Any?) { onContextAction?(.moveLeft) }
     @objc private func paneMoveRight(_ sender: Any?) { onContextAction?(.moveRight) }
+    @objc private func handleRename() { onRename?() }
     @objc private func moveToProject(_ sender: NSMenuItem) {
         if let project = sender.representedObject as? Project {
             onContextAction?(.moveToProject(project))
@@ -157,6 +184,14 @@ final class TerminalPaneView: NSView, NSMenuDelegate {
             terminal.trailingAnchor.constraint(equalTo: trailingAnchor),
             terminal.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
+
+        // Focus accent is driven by the window (see KeyWindow.makeFirstResponder),
+        // which reliably fires for every first-responder change — clicks included.
+    }
+
+    /// Show the accent focus line when this pane's terminal is the key first responder.
+    func setFocused(_ focused: Bool) {
+        focusBar.isHidden = !focused
     }
 
     override func layout() {
@@ -171,14 +206,145 @@ final class TerminalPaneView: NSView, NSMenuDelegate {
         titleLabel.stringValue = title
     }
 
+    func setWorkingDirectory(_ directory: String) {
+        pathLabel.stringValue = directory
+        pathLabel.toolTip = directory
+    }
+
     func setExited(suffix: String) {
+        isExited = true
         exitedTag.stringValue = "exited" + suffix
         exitedTag.isHidden = false
-        layer?.backgroundColor = NSColor.underPageBackgroundColor.cgColor
+        layer?.backgroundColor = Brand.forest.cgColor
+    }
+
+    func applyThemeToChrome() {
+        layer?.backgroundColor = isExited ? Brand.forest.cgColor : Brand.ink.cgColor
+        header.layer?.backgroundColor = Brand.inkRaised.cgColor
+        titleLabel.textColor = Brand.terminalText
+        pathLabel.textColor = Brand.accent.withAlphaComponent(0.72)
+        closeButton.contentTintColor = Brand.terminalText.withAlphaComponent(0.72)
+        focusBar.layer?.backgroundColor = Brand.accent.cgColor
     }
 
     @objc private func handleClose() {
         onClose?()
+    }
+}
+
+// MARK: - FileDropTerminalView
+
+/// SwiftTerm owns the terminal's hit testing, so file drops need to be handled by
+/// the terminal view itself rather than by the surrounding pane. Dropped files are
+/// inserted as shell-escaped paths, matching Terminal.app without executing anything.
+final class FileDropTerminalView: LocalProcessTerminalView {
+
+    /// Called before SwiftTerm feeds a PTY chunk into the visible terminal. The app uses
+    /// this to keep a bounded, readable transcript for local MCP clients.
+    var onOutput: ((ArraySlice<UInt8>) -> Void)?
+
+    private var isDropTarget = false
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        configureMouseSelectionPolicy()
+        registerForDraggedTypes([.fileURL, .URL, .string])
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        configureMouseSelectionPolicy()
+        registerForDraggedTypes([.fileURL, .URL, .string])
+    }
+
+    private func configureMouseSelectionPolicy() {
+        // Plain drags should behave like a normal terminal selection, even when a
+        // full-screen program has enabled mouse reporting. Option-drag remains available
+        // for programs such as tmux and vim that need the raw mouse event.
+        allowMouseReporting = false
+        toolTip = "Drag to select text · Option-drag for app mouse input"
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        allowMouseReporting = event.modifierFlags.contains(.option)
+        super.mouseDown(with: event)
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        super.mouseDragged(with: event)
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        super.mouseUp(with: event)
+        allowMouseReporting = false
+    }
+
+    override func dataReceived(slice: ArraySlice<UInt8>) {
+        onOutput?(slice)
+        super.dataReceived(slice: slice)
+    }
+
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        guard hasSupportedDrop(sender.draggingPasteboard) else { return [] }
+        setDropTarget(true)
+        return .copy
+    }
+
+    override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+        hasSupportedDrop(sender.draggingPasteboard) ? .copy : []
+    }
+
+    override func draggingExited(_ sender: NSDraggingInfo?) {
+        setDropTarget(false)
+    }
+
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        defer { setDropTarget(false) }
+
+        let pasteboard = sender.draggingPasteboard
+        let paths = (pasteboard.readObjects(
+            forClasses: [NSURL.self],
+            options: [.urlReadingFileURLsOnly: true]
+        ) ?? []).compactMap { object -> String? in
+            if let url = object as? URL { return url.path }
+            if let url = object as? NSURL { return url.path }
+            return nil
+        }
+
+        let insertedText: String
+        if !paths.isEmpty {
+            insertedText = paths.map(Self.shellQuote).joined(separator: " ")
+        } else if let text = pasteboard.string(forType: .string), !text.isEmpty {
+            insertedText = text
+        } else {
+            return false
+        }
+
+        window?.makeFirstResponder(self)
+        insertText(insertedText, replacementRange: NSRange(location: 0, length: 0))
+        return true
+    }
+
+    private func hasSupportedDrop(_ pasteboard: NSPasteboard) -> Bool {
+        if let objects = pasteboard.readObjects(
+            forClasses: [NSURL.self],
+            options: [.urlReadingFileURLsOnly: true]
+        ), !objects.isEmpty {
+            return true
+        }
+        return pasteboard.string(forType: .string)?.isEmpty == false
+    }
+
+    private func setDropTarget(_ active: Bool) {
+        guard active != isDropTarget else { return }
+        isDropTarget = active
+        wantsLayer = true
+        layer?.borderWidth = active ? 1 : 0
+        layer?.borderColor = active ? Brand.accent.cgColor : nil
+    }
+
+    private static func shellQuote(_ path: String) -> String {
+        "'" + path.replacingOccurrences(of: "'", with: "'\\''") + "'"
     }
 }
 
@@ -202,17 +368,35 @@ final class TerminalGridContainer: NSView {
     private var rowTopY: [CGFloat] = []
     private var rowH: [CGFloat] = []
 
-    let spacing: CGFloat = 4
+    /// Flush, edge-to-edge panes separated by a 1px hairline. Dividers stay draggable
+    /// via the resize overlay (6px grab band around each hairline).
+    let spacing: CGFloat = 1
+    private let contentInset: CGFloat = 0
+    private var layoutBounds = NSRect.zero
+
+    /// How panes are arranged (see `Layout`). Defaults to `.auto`.
+    var layoutMode: Layout = Settings.shared.layoutMode {
+        didSet {
+            columnWeights = []
+            rowWeights = []
+            needsLayout = true
+            needsDisplay = true
+        }
+    }
+
+    /// Merged-cell spans keyed by pane index, e.g. the bottom pane of "2 + 1".
+    /// nil ⇒ regular grid (every pane fills exactly one cell).
+    private var spans: [Int: (rowSpan: Int, colSpan: Int)]? = nil
 
     init() {
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         wantsLayer = true
-        layer?.backgroundColor = NSColor.underPageBackgroundColor.cgColor
+        layer?.backgroundColor = Brand.forest.cgColor
 
         emptyLabel.translatesAutoresizingMaskIntoConstraints = false
         emptyLabel.font = .systemFont(ofSize: 14, weight: .regular)
-        emptyLabel.textColor = .secondaryLabelColor
+        emptyLabel.textColor = Brand.terminalText.withAlphaComponent(0.62)
         emptyLabel.alignment = .center
         emptyLabel.isHidden = true
         addSubview(emptyLabel)
@@ -230,6 +414,15 @@ final class TerminalGridContainer: NSView {
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    func applyThemeToChrome() {
+        layer?.backgroundColor = Brand.forest.cgColor
+        for pane in panes {
+            pane.applyThemeToChrome()
+        }
+        emptyLabel.textColor = Brand.terminalText.withAlphaComponent(0.62)
+        needsDisplay = true
+    }
 
     /// Swap the visible panes. Panes that are already on screen (same session) are reused
     /// in place so their shells keep running seamlessly; the rest are added/removed.
@@ -260,28 +453,113 @@ final class TerminalGridContainer: NSView {
         window?.makeFirstResponder(first.terminal)
     }
 
+    func focus(_ session: TerminalSession) {
+        guard let pane = panes.first(where: { $0 === session.pane }) else { return }
+        window?.makeFirstResponder(pane.terminal)
+    }
+
+    /// Move keyboard focus to the next visible pane (wraps), or the first pane if none
+    /// is currently focused. Bound to ⌘] in the View menu.
+    func focusNext() {
+        guard !panes.isEmpty else { return }
+        let index = focusedPaneIndex()
+        let next = index.map { ($0 + 1) % panes.count } ?? 0
+        window?.makeFirstResponder(panes[next].terminal)
+    }
+
+    /// Move keyboard focus to the previous visible pane (wraps), or the last pane if none
+    /// is currently focused. Bound to ⌘[ in the View menu.
+    func focusPrevious() {
+        guard !panes.isEmpty else { return }
+        let index = focusedPaneIndex()
+        let prev = index.map { ($0 - 1 + panes.count) % panes.count } ?? panes.count - 1
+        window?.makeFirstResponder(panes[prev].terminal)
+    }
+
+    /// The pane whose terminal currently has keyboard focus, if any.
+    func focusedPane() -> TerminalPaneView? {
+        guard let idx = focusedPaneIndex() else { return nil }
+        return panes[idx]
+    }
+
+    /// Clear the focused terminal's screen (sends Ctrl-L, the classic clear/redraw).
+    func clearFocusedScreen() {
+        guard let idx = focusedPaneIndex() else { return }
+        panes[idx].terminal.send([0x0c])
+    }
+
+    /// Index of the pane whose terminal (or a descendant) is the current first responder.
+    private func focusedPaneIndex() -> Int? {
+        guard let responder = window?.firstResponder as? NSView else { return nil }
+        var current: NSView? = responder
+        while let view = current {
+            if let idx = panes.firstIndex(where: { $0 === view }) { return idx }
+            current = view.superview
+        }
+        return nil
+    }
+
+    /// Recompute which pane is focused and toggle each pane's accent line.
+    /// Called by the window whenever the first responder changes.
+    func refreshFocus() {
+        let idx = focusedPaneIndex()
+        for (i, pane) in panes.enumerated() {
+            pane.setFocused(i == idx)
+        }
+    }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        (window as? KeyWindow)?.onFirstResponderChange = { [weak self] in
+            self?.refreshFocus()
+        }
+        refreshFocus()
+    }
+
+    /// Returns true when the current first responder is inside one of the visible
+    /// terminal panes. Store updates happen for shell title/cwd changes too, so callers
+    /// must not refocus the first pane just because the UI refreshed.
+    func hasFocusedTerminal() -> Bool {
+        guard let responder = window?.firstResponder as? NSView else { return false }
+        var current: NSView? = responder
+        while let view = current {
+            if panes.contains(where: { $0 === view }) { return true }
+            current = view.superview
+        }
+        return false
+    }
+
     // MARK: Layout (weighted)
 
     override func layout() {
         super.layout()
         resizeOverlay.frame = bounds
-        guard !panes.isEmpty else { return }
+        guard !panes.isEmpty else {
+            lastRows = 0
+            lastCols = 0
+            needsDisplay = true
+            return
+        }
 
         let n = panes.count
-        let (rows, cols) = gridDimensions(n)
+        let arrangement = layoutMode.arrange(paneCount: n)
+        let rows = arrangement.rows
+        let cols = arrangement.cols
+        spans = arrangement.spans
         if columnWeights.count != cols { columnWeights = Array(repeating: 1, count: cols) }
         if rowWeights.count != rows { rowWeights = Array(repeating: 1, count: rows) }
         lastRows = rows
         lastCols = cols
 
         let gap = spacing
-        let availW = bounds.width - gap * CGFloat(cols - 1)
-        let availH = bounds.height - gap * CGFloat(rows - 1)
+        layoutBounds = bounds.insetBy(dx: contentInset, dy: contentInset)
+        let availW = layoutBounds.width - gap * CGFloat(cols - 1)
+        let availH = layoutBounds.height - gap * CGFloat(rows - 1)
         let totalCW = columnWeights.reduce(0, +)
         let totalRW = rowWeights.reduce(0, +)
 
         colX = []; colW = []
-        var x: CGFloat = 0
+        var x = layoutBounds.minX
         for c in 0..<cols {
             let w = availW * columnWeights[c] / max(totalCW, 1)
             colX.append(x); colW.append(w)
@@ -289,7 +567,7 @@ final class TerminalGridContainer: NSView {
         }
 
         rowTopY = []; rowH = []
-        var yTop = bounds.maxY
+        var yTop = layoutBounds.maxY
         for r in 0..<rows {
             let h = availH * rowWeights[r] / max(totalRW, 1)
             rowTopY.append(yTop); rowH.append(h)
@@ -299,12 +577,18 @@ final class TerminalGridContainer: NSView {
         for (i, pane) in panes.enumerated() {
             let row = i / cols
             let col = i % cols
+            let span = spans?[i] ?? (rowSpan: 1, colSpan: 1)
+            let width = (0..<span.colSpan).reduce(CGFloat.zero) { $0 + colW[col + $1] }
+                + gap * CGFloat(max(span.colSpan - 1, 0))
+            let height = (0..<span.rowSpan).reduce(CGFloat.zero) { $0 + rowH[row + $1] }
+                + gap * CGFloat(max(span.rowSpan - 1, 0))
             pane.frame = NSRect(x: colX[col],
-                                y: rowTopY[row] - rowH[row],
-                                width: colW[col],
-                                height: rowH[row])
+                                y: rowTopY[row] - height,
+                                width: width,
+                                height: height)
             pane.needsLayout = true
         }
+        needsDisplay = true
     }
 
     override func resize(withOldSuperviewSize oldSize: NSSize) {
@@ -318,17 +602,31 @@ final class TerminalGridContainer: NSView {
         guard lastRows > 0, lastCols > 0 else { return nil }
         for c in 0..<(lastCols - 1) {
             let xdiv = colX[c] + colW[c] + spacing / 2
-            if abs(p.x - xdiv) <= threshold, p.y >= 0, p.y <= bounds.height {
+            if abs(p.x - xdiv) <= threshold,
+               dividerVisible(.vertical, index: c, at: p) {
                 return (.vertical, c)
             }
         }
         for r in 0..<(lastRows - 1) {
             let ydiv = rowTopY[r] - rowH[r] - spacing / 2
-            if abs(p.y - ydiv) <= threshold, p.x >= 0, p.x <= bounds.width {
+            if abs(p.y - ydiv) <= threshold,
+               dividerVisible(.horizontal, index: r, at: p) {
                 return (.horizontal, r)
             }
         }
         return nil
+    }
+
+    private func dividerVisible(_ axis: DividerAxis, index: Int, at point: NSPoint) -> Bool {
+        guard point.x >= layoutBounds.minX, point.x <= layoutBounds.maxX,
+              point.y >= layoutBounds.minY, point.y <= layoutBounds.maxY else { return false }
+        // In the signature 2 + 1 composition, the vertical divider belongs only to the
+        // top pair. Keeping it out of the full-width lower pane removes the awkward
+        // floating line that made the old middle feel accidental.
+        if layoutMode == .twoTopOneBottom, panes.count == 3, axis == .vertical, index == 0 {
+            return point.y >= rowTopY[0] - rowH[0] && point.y <= rowTopY[0]
+        }
+        return true
     }
 
     func beginResize(axis: DividerAxis, index: Int, at p: NSPoint) {
@@ -345,8 +643,8 @@ final class TerminalGridContainer: NSView {
         let weights = dragStartWeights
         let pairSum = weights[i0] + weights[i1]
         let extent = axis == .vertical
-            ? (bounds.width - spacing * CGFloat(lastCols - 1))
-            : (bounds.height - spacing * CGFloat(lastRows - 1))
+            ? (layoutBounds.width - spacing * CGFloat(lastCols - 1))
+            : (layoutBounds.height - spacing * CGFloat(lastRows - 1))
         let frac = delta / max(extent, 1)
         let wDelta = frac * pairSum
         let minW = pairSum * 0.2
@@ -362,6 +660,33 @@ final class TerminalGridContainer: NSView {
             rowWeights[i0] = w0; rowWeights[i1] = w1
         }
         needsLayout = true
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+        guard !panes.isEmpty, lastRows > 0, lastCols > 0 else { return }
+
+        // Minimalist: a single 1px hairline marks each divider — no gutter, no handle.
+        let hairline = Brand.forestRaised.withAlphaComponent(0.55)
+        hairline.setFill()
+
+        if lastCols > 1 {
+            for c in 0..<(lastCols - 1) {
+                let x = colX[c] + colW[c]
+                let y = (layoutMode == .twoTopOneBottom && panes.count == 3 && c == 0)
+                    ? rowTopY[0] - rowH[0] : layoutBounds.minY
+                let height = (layoutMode == .twoTopOneBottom && panes.count == 3 && c == 0)
+                    ? rowH[0] : layoutBounds.height
+                NSBezierPath(rect: NSRect(x: x, y: y, width: 1, height: height)).fill()
+            }
+        }
+        if lastRows > 1 {
+            for r in 0..<(lastRows - 1) {
+                let y = rowTopY[r] - rowH[r]
+                NSBezierPath(rect: NSRect(x: layoutBounds.minX, y: y,
+                                          width: layoutBounds.width, height: 1)).fill()
+            }
+        }
     }
 
     func endResize() {
@@ -447,7 +772,9 @@ final class ResizeOverlay: NSView {
             case .vertical: NSCursor.resizeLeftRight.set()
             case .horizontal: NSCursor.resizeUpDown.set()
             }
+        } else {
+            // Clear the manually-set resize cursor when the pointer leaves a divider.
+            NSCursor.arrow.set()
         }
-        // Not near a divider: leave the cursor to the view below (e.g. the terminal's i-beam).
     }
 }

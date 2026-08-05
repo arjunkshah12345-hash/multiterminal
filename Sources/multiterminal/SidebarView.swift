@@ -4,6 +4,7 @@ import AppKit
 
 private final class ProjectCellView: NSTableCellView {
     let countLabel = NSTextField(labelWithString: "")
+    let pathLabel = NSTextField(labelWithString: "")
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -12,8 +13,14 @@ private final class ProjectCellView: NSTableCellView {
         countLabel.textColor = .secondaryLabelColor
         countLabel.alignment = .right
         addSubview(countLabel)
+        pathLabel.translatesAutoresizingMaskIntoConstraints = false
+        pathLabel.font = .monospacedSystemFont(ofSize: 10, weight: .regular)
+        pathLabel.textColor = Brand.accent.withAlphaComponent(0.66)
+        pathLabel.lineBreakMode = .byTruncatingMiddle
+        pathLabel.cell?.truncatesLastVisibleLine = true
+        addSubview(pathLabel)
         NSLayoutConstraint.activate([
-            countLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4),
+            countLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
             countLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
     }
@@ -46,7 +53,7 @@ final class SidebarView: NSView, NSTableViewDelegate, NSTableViewDataSource {
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         wantsLayer = true
-        layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
+        layer?.backgroundColor = Brand.forestRaised.cgColor
 
         headerLabel.translatesAutoresizingMaskIntoConstraints = false
         headerLabel.font = .systemFont(ofSize: 11, weight: .semibold)
@@ -62,7 +69,7 @@ final class SidebarView: NSView, NSTableViewDelegate, NSTableViewDataSource {
         tableView.intercellSpacing = NSSize(width: 0, height: 2)
         tableView.style = .sourceList
         tableView.backgroundColor = .clear
-        tableView.rowSizeStyle = .default
+        tableView.rowHeight = 42
         let column = NSTableColumn(identifier: NSUserInterfaceItemIdentifier("project"))
         column.resizingMask = .autoresizingMask
         tableView.addTableColumn(column)
@@ -82,7 +89,8 @@ final class SidebarView: NSView, NSTableViewDelegate, NSTableViewDataSource {
         addButton.translatesAutoresizingMaskIntoConstraints = false
         addButton.bezelStyle = .smallSquare
         addButton.image = NSImage(systemSymbolName: "plus", accessibilityDescription: "New project")
-        addButton.imagePosition = .imageOnly
+        addButton.title = "New"
+        addButton.imagePosition = .imageLeading
         addButton.toolTip = "New project (⌘N)"
         addButton.target = self
         addButton.action = #selector(handleAdd)
@@ -90,10 +98,10 @@ final class SidebarView: NSView, NSTableViewDelegate, NSTableViewDataSource {
         addSubview(addButton)
 
         NSLayoutConstraint.activate([
-            headerLabel.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            headerLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            headerLabel.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 6),
+            headerLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
 
-            separator.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 6),
+            separator.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 4),
             separator.leadingAnchor.constraint(equalTo: leadingAnchor),
             separator.trailingAnchor.constraint(equalTo: trailingAnchor),
             separator.heightAnchor.constraint(equalToConstant: 1),
@@ -103,10 +111,10 @@ final class SidebarView: NSView, NSTableViewDelegate, NSTableViewDataSource {
             scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: addButton.topAnchor, constant: -2),
 
-            addButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
-            addButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
-            addButton.widthAnchor.constraint(equalToConstant: 24),
-            addButton.heightAnchor.constraint(equalToConstant: 24)
+            addButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
+            addButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -6),
+            addButton.widthAnchor.constraint(equalToConstant: 54),
+            addButton.heightAnchor.constraint(equalToConstant: 22)
         ])
     }
 
@@ -149,15 +157,24 @@ extension SidebarView {
                 name.translatesAutoresizingMaskIntoConstraints = false
                 c.addSubview(name)
                 NSLayoutConstraint.activate([
-                    name.leadingAnchor.constraint(equalTo: c.leadingAnchor, constant: 4),
-                    name.centerYAnchor.constraint(equalTo: c.centerYAnchor),
-                    name.trailingAnchor.constraint(lessThanOrEqualTo: c.countLabel.leadingAnchor, constant: -6)
+                    name.topAnchor.constraint(equalTo: c.topAnchor, constant: 5),
+                    name.leadingAnchor.constraint(equalTo: c.leadingAnchor, constant: 10),
+                    name.trailingAnchor.constraint(lessThanOrEqualTo: c.countLabel.leadingAnchor, constant: -8)
+                ])
+                c.pathLabel.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([
+                    c.pathLabel.topAnchor.constraint(equalTo: name.bottomAnchor, constant: 1),
+                    c.pathLabel.leadingAnchor.constraint(equalTo: name.leadingAnchor),
+                    c.pathLabel.trailingAnchor.constraint(lessThanOrEqualTo: c.countLabel.leadingAnchor, constant: -8),
+                    c.pathLabel.bottomAnchor.constraint(equalTo: c.bottomAnchor, constant: -5)
                 ])
                 c.textField = name
                 return c
             }()
         cell.textField?.stringValue = project.name
         cell.countLabel.stringValue = "\(project.sessions.count)"
+        cell.pathLabel.stringValue = (project.workingDirectory as NSString).abbreviatingWithTildeInPath
+        cell.pathLabel.textColor = Brand.accent.withAlphaComponent(0.66)
         cell.toolTip = project.workingDirectory
         return cell
     }
@@ -248,5 +265,10 @@ extension SidebarView: NSMenuDelegate {
         let row = tableView.clickedRow
         guard row >= 0 else { return }
         onDeleteProject?(row)
+    }
+
+    func applyTheme() {
+        layer?.backgroundColor = Brand.forestRaised.cgColor
+        tableView.reloadData()
     }
 }

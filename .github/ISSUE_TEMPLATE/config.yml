@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Contribution guide
+    url: https://github.com/arjunkshah12345-hash/multiterminal/blob/main/CONTRIBUTING.md
+    about: Read the local development and pull request guidelines.
+  - name: Security report
+    url: https://github.com/arjunkshah12345-hash/multiterminal/security/advisories/new
+    about: Report a vulnerability privately through GitHub Security Advisories.

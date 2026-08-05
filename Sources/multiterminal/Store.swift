@@ -30,29 +30,37 @@ final class TerminalSession: NSObject, LocalProcessTerminalViewDelegate {
     private(set) var workingDirectory: String?
     private(set) var isAlive: Bool = true
 
+    /// A user-set title that takes precedence over the shell's reported title, so a
+    /// rename sticks even when the running program changes its window title.
+    private var customTitle: String?
+
     /// Fired whenever title / cwd / alive-state changes, so the sidebar can refresh.
     var onStateChange: (() -> Void)?
 
     private var _closeHandler: ((TerminalSession) -> Void)?
+    private var shellIntegrationDirectory: URL?
+    private var isClosing = false
+    private var outputBuffer = ""
+    private let outputBufferLimit = 64 * 1024
 
     init(shell: String = Shell.preferred, initialDirectory: String?) {
-        let tv = LocalProcessTerminalView(frame: .zero)
+        let tv = FileDropTerminalView(frame: .zero)
         tv.translatesAutoresizingMaskIntoConstraints = false
         tv.font = Settings.shared.terminalFont
+        tv.nativeBackgroundColor = Brand.ink
+        tv.nativeForegroundColor = Brand.terminalText
+        tv.caretColor = Brand.accent
+        tv.caretTextColor = Brand.ink
+        tv.selectedTextBackgroundColor = Brand.accent.withAlphaComponent(0.82)
+        tv.selectedTextForegroundColor = Brand.ink
+        // A real terminal needs generous history; SwiftTerm defaults to only 500 lines.
+        tv.changeScrollback(10_000)
 
-        // A clean, full environment so the child shell behaves like a normal terminal.
-        var env = ProcessInfo.processInfo.environment
-        env["TERM"] = "xterm-256color"
-        env["TERM_PROGRAM"] = "multiterminal"
-        env["TERM_PROGRAM_VERSION"] = "1.0"
-        env["COLORTERM"] = "truecolor"
+        // A clean terminal boundary so shells and tmux behave like they do in a
+        // standalone terminal, even when the app itself was launched from tmux.
+        var env = TerminalEnvironment.configured(from: ProcessInfo.processInfo.environment)
+        shellIntegrationDirectory = ShellIntegration.configure(shell: shell, environment: &env)
         let envArray = env.map { "\($0.key)=\($0.value)" }
-
-        tv.startProcess(executable: shell,
-                        args: ["-l"],            // login shell so profiles are read
-                        environment: envArray,
-                        execName: nil,
-                        currentDirectory: initialDirectory)
 
         let baseTitle = (initialDirectory as NSString?)?.lastPathComponent.nilIfEmpty ?? "Terminal"
         title = baseTitle
@@ -60,8 +68,20 @@ final class TerminalSession: NSObject, LocalProcessTerminalViewDelegate {
         pane = TerminalPaneView(terminal: tv, title: baseTitle)
 
         super.init()
+        tv.onOutput = { [weak self] slice in
+            self?.appendOutput(slice)
+        }
+        tv.terminal.registerOscHandler(code: 777) { [weak self] data in
+            self?.handleTerminalNotification(data)
+        }
         tv.processDelegate = self
         pane.onClose = { [weak self] in self?.requestClose() }
+
+        tv.startProcess(executable: shell,
+                        args: ["-l"],            // login shell so profiles are read
+                        environment: envArray,
+                        execName: nil,
+                        currentDirectory: initialDirectory)
     }
 }
 
@@ -77,6 +97,8 @@ extension TerminalSession {
     }
 
     func setTerminalTitle(source: LocalProcessTerminalView, title: String) {
+        // Don't clobber a user rename.
+        guard customTitle == nil else { return }
         let cleaned = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty else { return }
         self.title = cleaned
@@ -84,11 +106,22 @@ extension TerminalSession {
         onStateChange?()
     }
 
+    /// Set a name that overrides the shell's title. Pass empty to revert to automatic.
+    func rename(to name: String) {
+        let cleaned = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        customTitle = cleaned.isEmpty ? nil : cleaned
+        let display = customTitle ?? (title.nilIfEmpty ?? "Terminal")
+        title = display
+        pane.setTitle(display)
+        onStateChange?()
+    }
+
     func hostCurrentDirectoryUpdate(source: TerminalView, directory: String?) {
         workingDirectory = directory
         if let dir = directory, !dir.isEmpty {
             let derived = (dir as NSString).lastPathComponent.nilIfEmpty ?? "Terminal"
-            if title.isEmpty || title == "Terminal" {
+            pane.setWorkingDirectory(derived)
+            if customTitle == nil && (title.isEmpty || title == "Terminal") {
                 title = derived
                 pane.setTitle(derived)
                 onStateChange?()
@@ -98,10 +131,21 @@ extension TerminalSession {
 
     func processTerminated(source: TerminalView, exitCode: Int32?) {
         isAlive = false
-        let deadTitle = (title.nilIfEmpty ?? "Terminal") + " — exited"
+        cleanupShellIntegration()
+        let deadTitle = (title.nilIfEmpty ?? "Terminal") + " - exited"
         title = deadTitle
         pane.setExited(suffix: exitCode.map { " (exit \($0))" } ?? " (terminated)")
         onStateChange?()
+        if !isClosing {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                CommandNotificationCenter.shared.deliver(
+                    title: "Terminal exited",
+                    body: self.title,
+                    suppressIfActive: self.isTerminalFocused
+                )
+            }
+        }
     }
 }
 
@@ -116,12 +160,118 @@ extension TerminalSession {
 
     /// Kill the underlying shell (used when closing the pane).
     func terminate() {
+        isClosing = true
+        cleanupShellIntegration()
         if isAlive { terminal.terminate() }
+    }
+
+    /// Send raw keyboard input to the live PTY. This intentionally accepts control
+    /// characters because MCP clients need to be able to drive interactive commands.
+    func writeInput(_ text: String) {
+        guard isAlive, !text.isEmpty else { return }
+        terminal.send(txt: text)
+    }
+
+    /// Return the most recent human-readable PTY output, capped so a noisy process cannot
+    /// make an MCP response unbounded.
+    func recentOutput(limit: Int = 16 * 1024) -> String {
+        let boundedLimit = min(max(limit, 1), outputBufferLimit)
+        return String(outputBuffer.suffix(boundedLimit))
     }
 
     /// Apply the current global font setting to this terminal (live font-size change).
     func applyFont() {
         terminal.font = Settings.shared.terminalFont
+    }
+
+    /// Apply the focused black/forest terminal palette without restarting the shell.
+    func applyTheme() {
+        terminal.nativeBackgroundColor = Brand.ink
+        terminal.nativeForegroundColor = Brand.terminalText
+        terminal.caretColor = Brand.accent
+        terminal.caretTextColor = Brand.ink
+        terminal.selectedTextBackgroundColor = Brand.accent.withAlphaComponent(0.82)
+        terminal.selectedTextForegroundColor = Brand.ink
+    }
+
+    private func handleTerminalNotification(_ data: ArraySlice<UInt8>) {
+        guard let text = String(bytes: data, encoding: .utf8) else { return }
+        let parts = text.components(separatedBy: ";")
+        guard parts.count >= 3, parts[0] == "notify" else { return }
+        let title = parts[1].isEmpty ? "Multiterminal" : parts[1]
+        let body = parts.dropFirst(2).joined(separator: ";")
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            CommandNotificationCenter.shared.deliver(
+                title: title,
+                body: body,
+                suppressIfActive: self.isTerminalFocused
+            )
+        }
+    }
+
+    private func appendOutput(_ data: ArraySlice<UInt8>) {
+        let text = String(decoding: data, as: UTF8.self)
+        guard !text.isEmpty else { return }
+        outputBuffer.append(Self.stripTerminalControlSequences(text))
+        if outputBuffer.count > outputBufferLimit {
+            outputBuffer = String(outputBuffer.suffix(outputBufferLimit))
+        }
+    }
+
+    private static func stripTerminalControlSequences(_ text: String) -> String {
+        // Keep output useful to API clients without exposing ANSI cursor movement, color,
+        // OSC metadata, or other terminal-emulator control bytes.
+        var result: [UInt8] = []
+        result.reserveCapacity(text.utf8.count)
+        var iterator = text.utf8.makeIterator()
+        while let byte = iterator.next() {
+            guard byte == 0x1B else {
+                if byte == 0x08 {
+                    // Remove the previous complete UTF-8 scalar, not only its final byte.
+                    while let last = result.last, (last & 0xC0) == 0x80 { result.removeLast() }
+                    if !result.isEmpty { result.removeLast() }
+                } else if byte >= 0x20 || byte == 0x09 || byte == 0x0A || byte == 0x0D {
+                    result.append(byte)
+                }
+                continue
+            }
+
+            guard let next = iterator.next() else { break }
+            switch next {
+            case 0x5B: // CSI: consume through the final byte.
+                while let value = iterator.next() {
+                    if value >= 0x40 && value <= 0x7E { break }
+                }
+            case 0x5D: // OSC: consume through BEL or ST.
+                var previousWasEscape = false
+                while let value = iterator.next() {
+                    if value == 0x07 || (previousWasEscape && value == 0x5C) { break }
+                    previousWasEscape = value == 0x1B
+                }
+            default:
+                break
+            }
+        }
+        return String(decoding: result, as: UTF8.self)
+    }
+
+    private var isTerminalFocused: Bool {
+        guard NSApp.isActive, let responder = NSApp.keyWindow?.firstResponder as? NSView else {
+            return false
+        }
+        var current: NSView? = responder
+        while let view = current {
+            if view === pane || view === terminal { return true }
+            current = view.superview
+        }
+        return false
+    }
+
+    private func cleanupShellIntegration() {
+        guard let directory = shellIntegrationDirectory else { return }
+        shellIntegrationDirectory = nil
+        try? FileManager.default.removeItem(at: directory)
     }
 }
 
@@ -198,6 +348,12 @@ final class Store {
         }
     }
 
+    func applyThemeToAll() {
+        for project in projects {
+            for session in project.sessions { session.applyTheme() }
+        }
+    }
+
     func deleteProject(at index: Int) {
         guard projects.indices.contains(index) else { return }
         projects[index].sessions.forEach { $0.terminate() }
@@ -246,12 +402,12 @@ final class Store {
     // MARK: Terminals
 
     @discardableResult
-    func addTerminal(to project: Project? = nil, in directory: String? = nil) -> TerminalSession? {
+    func addTerminal(to project: Project? = nil, in directory: String? = nil, shell: String? = nil) -> TerminalSession? {
         guard let target = project ?? selectedProject else { return nil }
         let dir = directory ?? target.workingDirectory
-        let session = TerminalSession(initialDirectory: dir)
-        session.registerCloseHandler { [weak self] s in self?.removeTerminal(s) }
+        let session = TerminalSession(shell: shell ?? Shell.preferred, initialDirectory: dir)
         target.sessions.append(session)
+        wire(session)
         notify()
         save()
         return session
@@ -297,6 +453,9 @@ final class Store {
 
     /// Move a terminal into a different project.
     func moveTerminal(_ session: TerminalSession, to target: Project) {
+        guard let source = projects.first(where: { $0.sessions.contains(where: { $0 === session }) }),
+              source !== target else { return }
+
         for project in projects {
             if let i = project.sessions.firstIndex(where: { $0 === session }) {
                 project.sessions.remove(at: i)
@@ -317,7 +476,9 @@ final class Store {
         for entry in saved {
             let name = entry["name"] as? String ?? "Project"
             let dir = entry["dir"] as? String ?? NSHomeDirectory()
-            let count = max(1, entry["count"] as? Int ?? 1)
+            // Zero is a valid persisted state: a user can intentionally close every pane
+            // in a project and recreate one later with ⌘T.
+            let count = max(0, entry["count"] as? Int ?? 1)
             let project = Project(name: name, workingDirectory: dir)
             for _ in 0..<count {
                 project.sessions.append(TerminalSession(initialDirectory: dir))
@@ -339,9 +500,14 @@ final class Store {
 
     /// Make sidebar badges refresh when a terminal's title/cwd/alive state changes.
     private func wire(_ project: Project) {
-        for session in project.sessions {
-            session.onStateChange = { [weak self] in self?.notify() }
+        project.sessions.forEach { wire($0) }
+    }
+
+    private func wire(_ session: TerminalSession) {
+        session.registerCloseHandler { [weak self] session in
+            self?.removeTerminal(session)
         }
+        session.onStateChange = { [weak self] in self?.notify() }
     }
 
     private func notify() { onChange?() }

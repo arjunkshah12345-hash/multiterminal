@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, macos-15]
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Cache SwiftPM artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            .build
+            ~/Library/Caches/org.swift.swiftpm
+          key: ${{ runner.os }}-${{ runner.arch }}-swiftpm-${{ hashFiles('Package.swift', 'Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-swiftpm-
+
+      - name: Validate whitespace
+        run: git diff --check
+
+      - name: Test
+        run: swift test
+
+      - name: Verify test discovery
+        run: |
+          swift test list > test-list.txt
+          grep -q LayoutTests test-list.txt
+
+      - name: Build release binary
+        run: swift build -c release
+
+      - name: Assemble app bundle
+        run: sh tools/build_app.sh release
+
+      - name: Verify app bundle
+        run: codesign --verify --deep --strict Multiterminal.app
+
+      - name: Archive app bundle
+        run: ditto -c -k --sequesterRsrc --keepParent Multiterminal.app Multiterminal-${{ matrix.os }}.zip
+
+      - name: Upload app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Multiterminal-${{ matrix.os }}
+          path: Multiterminal-${{ matrix.os }}.zip

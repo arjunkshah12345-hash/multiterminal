@@ -1,0 +1,60 @@
+name: Bug report
+description: Report a reproducible problem in Multiterminal.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for making the bug easy to reproduce. Please remove secrets from logs and screenshots.
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: macOS 15.5
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: Multiterminal version or commit
+      placeholder: main at abc1234
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Drag ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: shell
+    attributes:
+      label: Shell
+      options:
+        - zsh
+        - bash
+        - Other
+      default: 0
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Logs or screenshots
+      description: Paste relevant output or drag screenshots here. Redact secrets first.
