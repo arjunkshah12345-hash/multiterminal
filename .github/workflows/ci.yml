@@ -60,7 +60,7 @@ jobs:
         run: ditto -c -k --sequesterRsrc --keepParent Multiterminal.app Multiterminal-${{ matrix.os }}.zip
 
       - name: Upload app artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Multiterminal-${{ matrix.os }}
           path: Multiterminal-${{ matrix.os }}.zip
