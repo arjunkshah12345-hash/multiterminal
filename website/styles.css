@@ -517,6 +517,155 @@ a:focus-visible {
   margin: 0;
 }
 
+.install-hero {
+  background: var(--surface);
+  border: 1px solid var(--glyph-hot)14;
+  border-radius: var(--radius);
+  padding: clamp(24px, 4vw, 40px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 24px;
+}
+
+.btn-install {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  padding: 18px 36px;
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.16s, box-shadow 0.16s;
+  box-shadow: 0 4px 24px rgba(120, 205, 190, 0.25);
+}
+
+.btn-install:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 32px rgba(120, 205, 190, 0.35);
+}
+
+.btn-install:active {
+  transform: translateY(0);
+}
+
+.install-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.install-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.install-title {
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.install-sub {
+  font-size: 13px;
+  opacity: 0.85;
+  font-weight: 400;
+}
+
+.install-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.install-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-raised);
+  border: 1px solid var(--glyph-hot)14;
+  border-radius: 12px;
+  padding: 12px 16px;
+  text-align: left;
+  min-width: 160px;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.step-content strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--glyph-hot);
+}
+
+.step-content span {
+  font-size: 11px;
+  color: var(--glyph-rest);
+}
+
+.install-arrow {
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 300;
+}
+
+.advanced-section {
+  background: var(--surface);
+  border: 1px solid var(--glyph-hot)14;
+  border-radius: var(--radius);
+  padding: clamp(16px, 3vw, 24px);
+  margin-top: 20px;
+}
+
+.advanced-section summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--glyph-hot);
+  padding: 8px 0;
+  user-select: none;
+}
+
+.advanced-section summary:hover {
+  color: var(--accent);
+}
+
+.advanced-section .copy-wrap {
+  margin-top: 16px;
+}
+
+.advanced-section .api-note {
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--glyph-rest);
+}
+
 .install-steps {
   list-style: none;
   counter-reset: step;
@@ -693,5 +842,57 @@ td .mono-hint {
   }
   .navlinks .hide-sm {
     display: none;
+  }
+
+  .btn-install {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .install-visual {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .install-arrow {
+    transform: rotate(90deg);
+  }
+
+  .install-step {
+    width: 100%;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f5f5f0;
+    --bg-deep: #eaeae5;
+    --surface: #ffffff;
+    --surface-raised: #f0f0eb;
+    --glyph-rest: #4a4a45;
+    --glyph-hot: #1a1a18;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  .btn-install {
+    color: var(--bg);
+  }
+
+  .install-step {
+    background: var(--surface-raised);
+    border-color: var(--glyph-rest)14;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

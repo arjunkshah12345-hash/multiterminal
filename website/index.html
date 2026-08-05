@@ -134,46 +134,67 @@
         <p class="index">04 · install</p>
         <h2>put it on your mac</h2>
         <p class="lead">
-          No account, no cloud setup, no App Store. Download the app and drag it into
-          Applications — or build it from source. macOS 12+, Apple Silicon &amp; Intel.
+          No account, no cloud setup, no App Store. One click. Drag. Done. macOS 12+,
+          Apple Silicon &amp; Intel.
         </p>
 
         <div class="install-stack">
-          <div class="download-card">
-            <a class="btn btn-solid btn-lg" href="downloads/Multiterminal.dmg" download>Download for Mac</a>
-            <p class="download-meta">~3&nbsp;MB · free · no Apple Developer ID required</p>
-            <ol class="install-steps">
-              <li>Open <code>Multiterminal.dmg</code> and drag <strong>Multiterminal</strong> into <strong>Applications</strong>.</li>
-              <li>In Applications, right-click <strong>Multiterminal</strong> → <strong>Open</strong> the first time. This clears Gatekeeper once (the app isn’t notarized).</li>
-              <li>Launch it any time from Launchpad or Spotlight.</li>
-            </ol>
-            <p class="install-tip">Power-user one-liner — copy the app and clear quarantine from the terminal:</p>
-            <div class="copy-wrap">
-              <button class="copy-btn" type="button" aria-label="Copy installation commands">copy</button>
-              <pre class="codeblock"><span class="dim"># mount the dmg, install, clear Gatekeeper quarantine</span>
-$ cp -R /Volumes/Multiterminal/Multiterminal.app /Applications &amp;&amp; \
-  hdiutil detach /Volumes/Multiterminal &amp;&amp; \
-  xattr -dr com.apple.quarantine /Applications/Multiterminal.app</pre>
+          <div class="install-hero">
+            <a class="btn btn-install" href="downloads/Multiterminal.dmg" download>
+              <span class="install-icon">⬇</span>
+              <span class="install-text">
+                <span class="install-title">Install Multiterminal</span>
+                <span class="install-sub">Free download · 3 MB · macOS 12+</span>
+              </span>
+            </a>
+
+            <div class="install-visual">
+              <div class="install-step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                  <strong>Click the button above</strong>
+                  <span>Downloads Multiterminal.dmg</span>
+                </div>
+              </div>
+              <div class="install-arrow">→</div>
+              <div class="install-step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                  <strong>Drag Multiterminal to Applications</strong>
+                  <span>Opens automatically in Finder</span>
+                </div>
+              </div>
+              <div class="install-arrow">→</div>
+              <div class="install-step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                  <strong>Launch from Launchpad</strong>
+                  <span>Right-click → Open the first time</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="copy-wrap">
-            <button class="copy-btn" type="button" aria-label="Copy clone and run commands">copy</button>
-            <pre class="codeblock"><span class="dim"># clone and run</span>
+          <details class="advanced-section">
+            <summary>Advanced: Build from source or connect MCP</summary>
+            
+            <div class="copy-wrap">
+              <button class="copy-btn" type="button" aria-label="Copy clone and run commands">copy</button>
+              <pre class="codeblock"><span class="dim"># clone and run</span>
 $ git clone https://github.com/arjunkshah12345-hash/multiterminal.git
 $ cd multiterminal
 $ swift run</pre>
-          </div>
+            </div>
 
-          <p class="api-note">
-            <code>Swift + AppKit</code> with SwiftTerm underneath. Build from source,
-            inspect what runs, and keep your projects where they already live. macOS 12+
-            and Swift 5.9+.
-          </p>
+            <p class="api-note">
+              <code>Swift + AppKit</code> with SwiftTerm underneath. Build from source,
+              inspect what runs, and keep your projects where they already live. macOS 12+
+              and Swift 5.9+.
+            </p>
 
-          <div class="copy-wrap">
-            <button class="copy-btn" type="button" aria-label="Copy MCP configuration">copy</button>
-            <pre class="codeblock"><span class="dim"># connect an MCP client</span>
+            <div class="copy-wrap">
+              <button class="copy-btn" type="button" aria-label="Copy MCP configuration">copy</button>
+              <pre class="codeblock"><span class="dim"># connect an MCP client</span>
 {
   <span class="src">"mcpServers"</span>: {
     <span class="src">"multiterminal"</span>: {
@@ -181,7 +202,8 @@ $ swift run</pre>
     }
   }
 }</pre>
-          </div>
+            </div>
+          </details>
         </div>
 
         <table>
